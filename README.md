@@ -61,10 +61,11 @@ npm install
 npm run dev
 ```
 
-### 4. Run backend
+### 4. Prepare & run backend
 
 ```
 cd backend
+uv sync
 uv run uvicorn app.main:app --reload --port 8000
 ```
 
@@ -89,4 +90,4 @@ uv run uvicorn app.main:app --reload --port 8000
 
 ## License
 
-MIT © 2025 Your Name
+Apache-2.0 © 2025 i-typed-this contributors
