@@ -69,6 +69,27 @@ uv sync
 uv run uvicorn app.main:app --reload --port 8000
 ```
 
+### 5. Install pre-commit hooks
+
+These hooks guard lint and test standards locally before code lands in CI.
+
+```
+pipx install pre-commit            # or pip install pre-commit
+pre-commit install
+```
+
+Hooks run frontend ESLint/Vitest and backend Ruff/pytest (skipping backend checks until the service directory exists). Use `pre-commit run --all-files` to validate everything manually.
+
+### 6. Continuous integration
+
+The GitHub Actions workflow at `.github/workflows/ci.yml` mirrors local checks on every push and pull request against `main`:
+
+- A detection job checks whether the backend service exists (by looking for `backend/pyproject.toml`) and shares that state with downstream jobs.
+- Frontend job installs Node 20, restores npm cache, runs `npm ci`, then executes `npm run lint` and `npm run test -- --run --passWithNoTests`.
+- Backend job runs only when the detection job confirms the backend is present; it installs dependencies with `uv sync --all-extras --dev`, runs `uv run ruff check .`, and finishes with `uv run pytest`.
+
+CI acts as a gatekeeper so branches without passing lint/tests never land in protected branches.
+
 ---
 
 ## Docs
