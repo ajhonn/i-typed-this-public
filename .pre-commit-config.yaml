@@ -1,0 +1,59 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-added-large-files
+        args: ["--maxkb=500"]
+      - id: check-merge-conflict
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: local
+    hooks:
+      - id: frontend-lint
+        name: frontend lint
+        entry: bash
+        language: system
+        pass_filenames: false
+        args:
+          - -lc
+          - >
+            cd frontend &&
+            npm run lint
+      - id: frontend-test
+        name: frontend test
+        entry: bash
+        language: system
+        pass_filenames: false
+        stages: [pre-commit, pre-push]
+        args:
+          - -lc
+          - >
+            cd frontend &&
+            npm run test -- --run --passWithNoTests
+      - id: backend-lint
+        name: backend lint
+        entry: bash
+        language: system
+        pass_filenames: false
+        args:
+          - -lc
+          - >
+            if [ -d backend ]; then
+              cd backend && uv run ruff check .
+            else
+              echo "backend directory missing; skipping backend lint"
+            fi
+      - id: backend-test
+        name: backend pytest
+        entry: bash
+        language: system
+        pass_filenames: false
+        stages: [pre-commit, pre-push]
+        args:
+          - -lc
+          - >
+            if [ -d backend ]; then
+              cd backend && uv run pytest
+            else
+              echo "backend directory missing; skipping backend tests"
+            fi
