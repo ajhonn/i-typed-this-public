@@ -9,11 +9,11 @@
 ## Foundation & Layout
 - [x] Set up routing (`/write`, `/playback`, `/learn`) and shared session context/store.
 - [x] Implement ribbon shell with tabs: Home, Session, Insights, Learn.
-- [x] Apply page-style centered layout and focus mode toggle.
+- [x] Apply page-style centered layout for the writing surface.
 - [x] Build dismissible hero modal and Learn page (use content from `docs/frontend-product-story.md`).
 
 ## Recorder & Writing View
-- [ ] Integrate Tiptap editor with ribbon formatting commands.
+- [x] Integrate Tiptap editor with ribbon formatting commands.
 - [ ] Implement recorder service capturing text-input, delete, selection changes, undo/redo, copy/cut/paste with clipboard ledger + hashing.
 - [ ] Emit event log + periodic snapshots; expose hooks for components.
 - [ ] Add session controls (download, load, clear) tied to schema.

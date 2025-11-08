@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import './features/styles/_variables.scss';
+@import './features/styles/_keyframe-animations.scss';
 
 @theme {
   --color-brand-50: #f2f6ff;
@@ -15,8 +17,57 @@
 
 :root {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: #f8fafc;
+  color: #0f172a;
 }
 
 body {
   margin: 0;
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+.writer-editor {
+  min-height: calc(100vh - 6rem);
+}
+
+.writer-editor .ProseMirror {
+  min-height: calc(100vh - 8rem);
+  background: white;
+  padding: 3rem;
+  border: 1px solid #e2e8f0;
+  box-shadow:
+    0 15px 30px rgba(15, 23, 42, 0.08),
+    0 5px 15px rgba(15, 23, 42, 0.06);
+  margin: 0 auto;
+  max-width: 816px; /* ~A4 width */
+}
+
+.writer-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.35rem 0;
+}
+
+.writer-toolbar .tiptap-button {
+  --tt-button-default-bg-color: transparent;
+  --tt-button-hover-bg-color: #e2e8f0;
+  --tt-button-active-bg-color: #cbd5f5;
+  --tt-button-default-text-color: #0f172a;
+  --tt-button-hover-text-color: #0f172a;
+  --tt-button-default-icon-color: #0f172a;
+  --tt-button-hover-icon-color: #0f172a;
+  --tt-button-default-dropdown-arrows-color: #475569;
+  --tt-button-hover-dropdown-arrows-color: #0f172a;
+}
+
+.writer-toolbar .tiptap-button .tiptap-button-icon {
+  color: #0f172a;
+}
+
+.writer-toolbar-group {
+  align-items: center;
+  display: flex;
+  gap: 0.25rem;
 }
