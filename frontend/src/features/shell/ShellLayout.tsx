@@ -2,6 +2,7 @@ import type { PropsWithChildren } from 'react';
 import Page from '@components/Page';
 import Ribbon from './Ribbon';
 import type { ShellTabKey } from './constants';
+import { useSession } from '@features/session/SessionProvider';
 
 type ShellLayoutProps = PropsWithChildren<{
   activeTab: ShellTabKey;
@@ -11,12 +12,18 @@ type ShellLayoutProps = PropsWithChildren<{
 }>;
 
 const ShellLayout = ({ activeTab, title, description, showHeader = true, children }: ShellLayoutProps) => {
+  const { recorderState } = useSession();
+  const isRecording = recorderState === 'recording';
+
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <Ribbon activeTab={activeTab} />
-      <Page title={title} description={description} showHeader={showHeader}>
-        {children}
-      </Page>
+    <div className="relative min-h-screen bg-slate-50 text-slate-900">
+      {isRecording ? <div className="recording-rainbow" /> : null}
+      <div className="relative z-10">
+        <Ribbon activeTab={activeTab} />
+        <Page title={title} description={description} showHeader={showHeader}>
+          {children}
+        </Page>
+      </div>
     </div>
   );
 };
