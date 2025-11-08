@@ -1,8 +1,9 @@
-import Page from '@components/Page';
+import ShellLayout from '@features/shell/ShellLayout';
 
 const WriteRoute = () => {
   return (
-    <Page
+    <ShellLayout
+      activeTab="write"
       title="Observe the writing journey"
       description="Replay keystrokes, verify integrity, and surface authorship signals from live writing sessions."
     >
@@ -23,7 +24,23 @@ const WriteRoute = () => {
           </li>
         </ul>
       </section>
-    </Page>
+      <section className="grid gap-4 rounded-xl border border-slate-900 bg-slate-950/40 p-6">
+        <h2 className="text-lg font-semibold text-brand-50">Recorder shell preview</h2>
+        <p className="text-sm text-slate-300">
+          This view will host the Tiptap editor, recorder indicator, clipboard ledger, and session controls outlined in{' '}
+          <span className="font-semibold text-brand-100">docs/frontend-ui-structure.md</span>. The familiar ribbon above will
+          eventually surface formatting buttons, download/load actions, and paste anomaly callouts.
+        </p>
+        <div className="grid gap-3 rounded-lg border border-dashed border-slate-800 p-4 text-left text-sm text-slate-400">
+          <p className="font-semibold text-slate-200">Coming soon</p>
+          <ul className="list-disc space-y-1 pl-5">
+            <li>Tiptap integration with recorder hooks</li>
+            <li>Session controls (download, load, clear)</li>
+            <li>Trusted-source guard rails and clipboard ledger</li>
+          </ul>
+        </div>
+      </section>
+    </ShellLayout>
   );
 };
 
