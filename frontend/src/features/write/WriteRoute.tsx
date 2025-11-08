@@ -1,6 +1,23 @@
+import { useEffect, useState } from 'react';
 import ShellLayout from '@features/shell/ShellLayout';
+import HeroModal from './HeroModal';
+
+const HERO_STORAGE_KEY = 'write-hero-dismissed';
 
 const WriteRoute = () => {
+  const [showHero, setShowHero] = useState(() => {
+    if (typeof window === 'undefined') {
+      return true;
+    }
+    return window.localStorage.getItem(HERO_STORAGE_KEY) !== 'true';
+  });
+
+  useEffect(() => {
+    if (!showHero && typeof window !== 'undefined') {
+      window.localStorage.setItem(HERO_STORAGE_KEY, 'true');
+    }
+  }, [showHero]);
+
   return (
     <ShellLayout
       activeTab="write"
@@ -40,6 +57,7 @@ const WriteRoute = () => {
           </ul>
         </div>
       </section>
+      {showHero ? <HeroModal onDismiss={() => setShowHero(false)} /> : null}
     </ShellLayout>
   );
 };
