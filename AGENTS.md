@@ -32,9 +32,11 @@ cd backend && uv run pytest       # Run backend tests with ephemeral SQLite by d
 - Follow Conventional Commits (`feat:`, `fix:`, `chore:`…) for clarity and changelog generation; squash trivial WIP commits before pushing.
 - Each PR should map to a single GitHub issue, include a succinct summary, test plan output, and screenshots or HAR captures when UI flows or API responses shift.
 - Keep PRs under ~400 changed lines; coordinate cross-repo updates in advance when touching shared packages or protocol docs.
+- Agents should stage code but leave commits to the human reviewer. After each milestone, provide (1) a succinct verification checklist (tests, manual steps) and (2) a suggested Conventional Commit message the human can run once satisfied.
 
 ## Documentation & Decision Making
 - Prefer official documentation for installation, configuration, and API references; when unsure, ask for the relevant docs instead of improvising so the human can provide the latest source.
+- Before adding or upgrading dependencies, consult the official docs/release notes and note the reference in PR descriptions or doc updates.
 - Capture methodology, rationale, and trade-offs in `docs/` alongside implementation updates so readers understand *why* changes were made, not just *what* changed.
 - When adding new tooling or dependencies, note the purpose, configuration surface, and maintenance plan in the relevant doc (e.g., `docs/architecture.md` or feature-specific ADRs).
 - Treat `docs/frontend-mvp-concept.md` (and its companion specs) as the source of truth for client architecture and evolution; update those documents in lockstep with code changes.
