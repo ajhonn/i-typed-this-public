@@ -23,7 +23,6 @@ describe('WriteRoute', () => {
       </SessionProvider>
     );
     expect(await screen.findByTestId('writer-editor')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /download session json/i })).toBeInTheDocument();
   });
 
   it(

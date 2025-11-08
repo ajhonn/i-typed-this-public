@@ -3,6 +3,7 @@ import { SHELL_TABS, type ShellTabKey } from './constants';
 import SessionStatus from './SessionStatus';
 import WriterToolbar from '@features/write/WriterToolbar';
 import { useWriterEditorContext } from '@features/write/WriterEditorContext';
+import PlaybackToolbar from '@features/playback/PlaybackToolbar';
 
 type RibbonProps = {
   activeTab: ShellTabKey;
@@ -41,6 +42,7 @@ const Ribbon = ({ activeTab }: RibbonProps) => {
           <SessionStatus state={sessionState} />
         </div>
         {activeTab === 'write' && writerEditor ? <WriterToolbar /> : null}
+        {activeTab === 'playback' ? <PlaybackToolbar /> : null}
       </div>
     </div>
   );

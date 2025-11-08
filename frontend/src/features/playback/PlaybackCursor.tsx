@@ -10,7 +10,7 @@ const PlaybackCursor = ({ top, left }: PlaybackCursorProps) => {
       className="absolute pointer-events-none"
       style={{ top, left }}
     >
-      <span className="block h-6 w-0.5 animate-pulse bg-slate-50" />
+      <span className="block h-7 w-0.5 animate-pulse bg-brand-500 shadow-lg" />
     </div>
   );
 };

@@ -4,7 +4,6 @@ import HeroModal from './HeroModal';
 import WriterEditor from './WriterEditor';
 import { WriterEditorProvider } from './WriterEditorContext';
 import { useWriterEditor } from './useWriterEditor';
-import SessionControls from './SessionControls';
 
 const HERO_STORAGE_KEY = 'write-hero-dismissed';
 
@@ -28,11 +27,10 @@ const WriteRoute = () => {
     <WriterEditorProvider editor={editor}>
       <ShellLayout
         activeTab="write"
-      title="Observe the writing journey"
-      description="Replay keystrokes, verify integrity, and surface authorship signals from live writing sessions."
-      showHeader={false}
-    >
-        <SessionControls />
+        title="Observe the writing journey"
+        description="Replay keystrokes, verify integrity, and surface authorship signals from live writing sessions."
+        showHeader={false}
+      >
         <WriterEditor />
         {showHero ? <HeroModal onDismiss={() => setShowHero(false)} /> : null}
       </ShellLayout>

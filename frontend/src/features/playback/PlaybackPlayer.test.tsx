@@ -1,7 +1,9 @@
 import { render, screen, waitFor } from '@testing-library/react';
+import { vi } from 'vitest';
 import { useEffect } from 'react';
 import { SessionProvider, useSession } from '@features/session/SessionProvider';
 import PlaybackPlayer from './PlaybackPlayer';
+import { PlaybackProvider } from './PlaybackControllerContext';
 
 const SeedPlayback = () => {
   const { appendEvent } = useSession();
@@ -25,24 +27,30 @@ const SeedPlayback = () => {
 };
 
 describe('PlaybackPlayer', () => {
-  it('renders slider and controls', async () => {
+  beforeEach(() => {
+    window.scrollTo = vi.fn();
+  });
+
+  it('renders the playback editor surface', async () => {
     render(
       <SessionProvider>
-        <SeedPlayback />
-        <PlaybackPlayer />
+        <PlaybackProvider>
+          <SeedPlayback />
+          <PlaybackPlayer />
+        </PlaybackProvider>
       </SessionProvider>
     );
 
-    expect(await screen.findByText(/Playback/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Play/i })).toBeInTheDocument();
-    expect(screen.getByLabelText(/Playback speed/i)).toBeInTheDocument();
+    expect(await screen.findByTestId('playback-editor')).toBeInTheDocument();
   });
 
   it('renders the playback cursor overlay', async () => {
     render(
       <SessionProvider>
-        <SeedPlayback />
-        <PlaybackPlayer />
+        <PlaybackProvider>
+          <SeedPlayback />
+          <PlaybackPlayer />
+        </PlaybackProvider>
       </SessionProvider>
     );
 
