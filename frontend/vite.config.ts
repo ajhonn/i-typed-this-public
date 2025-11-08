@@ -6,6 +6,7 @@ import path from 'node:path';
 const alias = {
   '@features': path.resolve(__dirname, 'src/features'),
   '@components': path.resolve(__dirname, 'src/components'),
+  '@routes': path.resolve(__dirname, 'src/routes'),
   '@test': path.resolve(__dirname, 'src/test')
 };
 
