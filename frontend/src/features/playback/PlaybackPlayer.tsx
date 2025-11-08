@@ -26,7 +26,6 @@ const PlaybackPlayer = () => {
     let chosen = events.filter((event) => {
       if (event.source === 'dom') return true;
       if (event.type === 'text-input' || event.type === 'delete') {
-        // Skip transaction-level typing snapshots when we have DOM data.
         return false;
       }
       return true;
@@ -34,17 +33,35 @@ const PlaybackPlayer = () => {
     if (!chosen.length) {
       chosen = events;
     }
-    let elapsed = 0;
 
-    return chosen.map((event, index) => ({
-      html: event.meta.html,
-      label: `${index + 1}. ${event.type}`,
-      timestamp: event.timestamp,
-      durationMs: event.meta.durationMs ?? 500,
-      selection: event.meta.selection,
-      source: event.source,
-      elapsedMs: (elapsed += event.meta.durationMs ?? 500),
-    }));
+    const sorted = chosen
+      .map((event, index) => ({ event, index }))
+      .sort((a, b) => {
+        if (a.event.timestamp === b.event.timestamp) {
+          return a.index - b.index;
+        }
+        return a.event.timestamp - b.event.timestamp;
+      });
+
+    let elapsed = 0;
+    return sorted.map(({ event }, index) => {
+      const next = sorted[index + 1]?.event;
+      const duration = next
+        ? Math.max(next.timestamp - event.timestamp, 16)
+        : 500;
+      const currentElapsed = elapsed;
+      elapsed += duration;
+
+      return {
+        html: event.meta.html,
+        label: `${index + 1}. ${event.type}`,
+        timestamp: event.timestamp,
+        durationMs: duration,
+        selection: event.meta.selection,
+        source: event.source,
+        elapsedMs: currentElapsed,
+      };
+    });
   }, [events, session.editorHTML]);
 
   const totalDuration = playbackEvents.reduce((sum, event) => sum + event.durationMs, 0);
