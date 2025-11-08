@@ -1,6 +1,6 @@
 import Page from '@components/Page';
 
-const HomePage = () => {
+const WriteRoute = () => {
   return (
     <Page
       title="Observe the writing journey"
@@ -27,4 +27,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default WriteRoute;
