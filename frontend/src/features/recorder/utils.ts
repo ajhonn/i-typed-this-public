@@ -6,6 +6,11 @@ const createEventId = () => {
 };
 
 const detectEventType = (transaction: Transaction): RecorderEventType => {
+  const hasMetaAccessor = typeof transaction.getMeta === 'function';
+  if (hasMetaAccessor && transaction.getMeta('pastePayload')) {
+    return 'paste';
+  }
+
   if (!transaction.docChanged) {
     return transaction.selectionSet ? 'selection-change' : 'transaction';
   }

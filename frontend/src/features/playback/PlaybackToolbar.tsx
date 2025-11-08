@@ -47,9 +47,12 @@ const PlaybackToolbar = () => {
           type="button"
           onClick={togglePlay}
           disabled={!canPlay}
-          className="rounded-full border border-slate-200 px-3 py-1 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-1.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {isPlaying ? 'Pause' : 'Play'}
+          <span aria-hidden className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 text-white">
+            {isPlaying ? '❚❚' : '▶'}
+          </span>
+          <span>{isPlaying ? 'Pause' : 'Play'}</span>
         </button>
         <button
           type="button"

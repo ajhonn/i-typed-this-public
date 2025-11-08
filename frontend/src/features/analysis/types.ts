@@ -23,6 +23,8 @@ export type SummaryMetric = {
   key: string;
   label: string;
   value: string;
+  description: string;
+  score: number;
   trend?: 'positive' | 'negative';
   helperText?: string;
 };
@@ -37,6 +39,16 @@ export type AnalysisSignals = {
 
 export type AnalysisVerdict = 'likely-authentic' | 'needs-review' | 'high-risk';
 
+export type PasteInsight = {
+  id: string;
+  timestamp: number;
+  label: string;
+  payloadPreview: string;
+  payloadLength: number;
+  classification: 'likely-internal' | 'unmatched';
+  idleBeforeMs: number;
+};
+
 export type SessionAnalysis = {
   segments: TimelineSegment[];
   bursts: BurstStat[];
@@ -44,4 +56,5 @@ export type SessionAnalysis = {
   signals: AnalysisSignals;
   verdict: AnalysisVerdict;
   verdictReasoning: string[];
+  pastes: PasteInsight[];
 };

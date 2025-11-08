@@ -1,3 +1,4 @@
+import { type ReactNode } from 'react';
 import { NavLink } from 'react-router';
 import { SHELL_TABS, type ShellTabKey } from './constants';
 import SessionStatus from './SessionStatus';
@@ -8,9 +9,10 @@ import { useSession } from '@features/session/SessionProvider';
 
 type RibbonProps = {
   activeTab: ShellTabKey;
+  endSlot?: ReactNode;
 };
 
-const Ribbon = ({ activeTab }: RibbonProps) => {
+const Ribbon = ({ activeTab, endSlot }: RibbonProps) => {
   const { recorderState } = useSession();
   const sessionState = activeTab === 'playback' ? 'reviewing' : recorderState;
   const writerEditor = useWriterEditorContext();
@@ -41,7 +43,10 @@ const Ribbon = ({ activeTab }: RibbonProps) => {
               ))}
             </nav>
           </div>
-          <SessionStatus state={sessionState} />
+          <div className="flex items-center gap-3">
+            <SessionStatus state={sessionState} />
+            {endSlot}
+          </div>
         </div>
         {activeTab === 'write' && writerEditor ? <WriterToolbar /> : null}
         {activeTab === 'playback' ? <PlaybackToolbar /> : null}

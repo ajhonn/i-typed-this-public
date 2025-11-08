@@ -54,6 +54,11 @@ export const useDomRecorder = (editor: Editor | null) => {
         },
       };
 
+      if (import.meta.env.DEV && domEventType === 'paste') {
+        const preview = (event.data ?? '').slice(0, 40);
+        console.info('[Recorder] DOM paste captured', { length: event.data?.length ?? 0, preview, durationMs });
+      }
+
       appendEvent(domEvent);
     };
 

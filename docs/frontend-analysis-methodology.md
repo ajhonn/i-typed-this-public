@@ -70,6 +70,7 @@ All rules should be tunable via configuration so thresholds can evolve without c
 ## 8. Implementation Status (MVP shell)
 - Segmentation, burst stats, revision counters, and heuristic verdicts now run client-side via `useSessionAnalysis`.
 - Paste events rely on DOM `insertFromPaste` hooks; unmatched classification currently uses payload size + idle-time heuristics until the clipboard ledger ships.
+- Paste events now capture clipboard payload previews client-side so reviewers can skim a ledger of inserts; a future iteration will hash-match against the copy buffer for stricter classification.
 - Playback renders a dedicated “Authorship signals” panel showing pause score, revision rate, burst variance, paste anomalies, and narrative reasoning so reviewers understand the verdict.
 
 ## 8. References

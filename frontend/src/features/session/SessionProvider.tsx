@@ -1,5 +1,5 @@
 import type { PropsWithChildren } from 'react';
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { RecorderEvent } from '@features/recorder/types';
 
 type SessionState = {
@@ -54,6 +54,20 @@ export const SessionProvider = ({ children }: PropsWithChildren) => {
   const clearSession = useCallback(() => {
     setSession(INITIAL_SESSION);
   }, []);
+
+  useEffect(() => {
+    if (import.meta.env.DEV && typeof window !== 'undefined') {
+      const devWindow = window as typeof window & {
+        __getRecorderSession?: () => SessionState;
+        __recorderDebugNotified?: boolean;
+      };
+      devWindow.__getRecorderSession = () => session;
+      if (!devWindow.__recorderDebugNotified) {
+        console.info('[Recorder] Debug helper ready: call window.__getRecorderSession() in DevTools to inspect events.');
+        devWindow.__recorderDebugNotified = true;
+      }
+    }
+  }, [session]);
 
   const value = useMemo(
     () => ({

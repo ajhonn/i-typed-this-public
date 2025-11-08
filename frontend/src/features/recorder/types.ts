@@ -21,5 +21,10 @@ export type RecorderEvent = {
       inputType: string;
       data?: string | null;
     };
+    pastePayload?: {
+      length: number;
+      preview: string;
+      source?: 'ledger' | 'external';
+    };
   };
 };

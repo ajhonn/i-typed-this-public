@@ -7,12 +7,13 @@ const SessionInspector = () => {
   const { session } = useSession();
   const { events, editorHTML } = session;
 
-  const counts = useMemo(() => {
-    return events.reduce<Record<string, number>>((acc, event) => {
-      acc[event.type] = (acc[event.type] ?? 0) + 1;
-      return acc;
-    }, {});
-  }, [events]);
+  const breakdown = useMemo(() => {
+    return [
+      { label: 'Typing events', value: session.events.filter((event) => event.type === 'text-input').length },
+      { label: 'Deletions', value: session.events.filter((event) => event.type === 'delete').length },
+      { label: 'Pastes', value: session.events.filter((event) => event.type === 'paste').length },
+    ];
+  }, [session.events]);
 
   const handleCopy = async () => {
     try {
@@ -51,25 +52,20 @@ const SessionInspector = () => {
         </div>
       </dl>
       {events.length ? (
-        <>
-          <div className="grid gap-2 rounded-xl border border-slate-100 bg-white p-4 text-sm text-slate-700">
-            <p className="text-xs uppercase tracking-wide text-slate-500">Breakdown</p>
-            <ul className="grid gap-1">
-              {Object.entries(counts).map(([type, count]) => (
-                <li key={type} className="flex items-center justify-between">
-                  <span className="font-medium capitalize text-slate-800">{type.replace('-', ' ')}</span>
-                  <span>{count}</span>
-                </li>
-              ))}
-            </ul>
+        <div className="grid gap-3 rounded-xl border border-slate-100 bg-white p-4 text-sm text-slate-700">
+          <div>
+            <p className="text-xs uppercase tracking-wide text-slate-500">Event breakdown</p>
+            <p className="text-xs text-slate-500">Counts tracked for debugging—visible only in dev mode.</p>
           </div>
-          <details className="rounded-xl border border-slate-100 bg-slate-50 p-4 text-sm text-slate-700">
-            <summary className="cursor-pointer text-slate-900">Raw session payload</summary>
-            <pre className="mt-3 max-h-72 overflow-auto rounded-lg bg-slate-900/90 p-3 text-xs text-slate-50">
-              {JSON.stringify(session, null, 2)}
-            </pre>
-          </details>
-        </>
+          <ul className="grid gap-1">
+            {breakdown.map((item) => (
+              <li key={item.label} className="flex items-center justify-between">
+                <span className="font-medium text-slate-800">{item.label}</span>
+                <span>{item.value}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : (
         <p className="text-sm text-slate-600">No recorder events yet. Type on the Write tab to populate this log.</p>
       )}

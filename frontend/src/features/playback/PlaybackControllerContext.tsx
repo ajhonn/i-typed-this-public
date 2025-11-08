@@ -20,6 +20,7 @@ type PlaybackControllerContextValue = {
   currentTime: number;
   setCurrentTime: (time: number) => void;
   isPlaying: boolean;
+  setPlaying: (playing: boolean) => void;
   togglePlay: () => void;
   reset: () => void;
   speed: number;
@@ -159,6 +160,10 @@ export const PlaybackProvider = ({ children }: PropsWithChildren) => {
     setIsPlaying((prev) => !prev);
   }, [canPlay]);
 
+  const setPlaying = useCallback((playing: boolean) => {
+    setIsPlaying(playing);
+  }, []);
+
   const reset = useCallback(() => {
     setIsPlaying(false);
     setCurrentTimeState(0);
@@ -180,6 +185,7 @@ export const PlaybackProvider = ({ children }: PropsWithChildren) => {
       currentTime,
       setCurrentTime,
       isPlaying,
+      setPlaying,
       togglePlay,
       reset,
       speed,
@@ -193,6 +199,7 @@ export const PlaybackProvider = ({ children }: PropsWithChildren) => {
       currentTime,
       setCurrentTime,
       isPlaying,
+      setPlaying,
       togglePlay,
       reset,
       speed,

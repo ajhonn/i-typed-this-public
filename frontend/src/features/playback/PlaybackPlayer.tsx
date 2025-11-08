@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { StarterKit } from '@tiptap/starter-kit';
 import PlaybackCursor from './PlaybackCursor';
 import { usePlaybackController } from './PlaybackControllerContext';
 
 const PlaybackPlayer = () => {
-  const { playbackEvents, currentTime } = usePlaybackController();
+  const { playbackEvents, currentTime, setPlaying } = usePlaybackController();
   const initialContent = useMemo(() => playbackEvents[0]?.html ?? '<p></p>', [playbackEvents]);
   const editor = useEditor(
     {
@@ -16,6 +16,14 @@ const PlaybackPlayer = () => {
     [initialContent]
   );
   const [cursorCoords, setCursorCoords] = useState<{ top: number; left: number } | null>(null);
+  const autoStartRef = useRef(false);
+
+  useEffect(() => {
+    if (!autoStartRef.current && playbackEvents.length > 1) {
+      setPlaying(true);
+      autoStartRef.current = true;
+    }
+  }, [playbackEvents.length, setPlaying]);
 
   useEffect(() => {
     if (!editor) return;

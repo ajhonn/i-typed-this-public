@@ -54,6 +54,7 @@ describe('SessionAnalysisPanel', () => {
       expect(screen.getByTestId('session-analysis')).toBeInTheDocument();
     });
     expect(screen.getByText(/Authorship signals/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/Paste anomalies/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Paste cleanliness/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/Paste ledger/i)).toBeInTheDocument();
   });
 });

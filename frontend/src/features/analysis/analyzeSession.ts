@@ -1,9 +1,11 @@
 import type { RecorderEvent } from '@features/recorder/types';
-import type { SessionAnalysis, TimelineSegment, BurstStat } from './types';
+import type { SessionAnalysis, TimelineSegment, BurstStat, PasteInsight } from './types';
 
 const MICRO_PAUSE_MS = 200;
 const MACRO_PAUSE_MS = 2000;
 const MIN_EVENT_DURATION = 16;
+
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
 const textFromHTML = (html: string) => {
   if (!html) return '';
@@ -20,8 +22,6 @@ const wordCount = (text: string) => {
   if (!trimmed) return 0;
   return trimmed.split(/\s+/).length;
 };
-
-const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
 type AnalyzerContext = {
   segments: TimelineSegment[];
@@ -73,6 +73,7 @@ const pushSegment = (
 export const analyzeSession = (events: RecorderEvent[], finalHtml: string): SessionAnalysis => {
   const sortedEvents = [...events].sort((a, b) => a.timestamp - b.timestamp);
   const ctx = initContext();
+  const pasteLog: PasteInsight[] = [];
 
   sortedEvents.forEach((event) => {
     const duration = Math.max(event.meta.durationMs ?? MIN_EVENT_DURATION, MIN_EVENT_DURATION);
@@ -100,6 +101,7 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
     }
 
     const domData = event.meta.domInput?.data ?? '';
+    const pastePayload = event.meta.pastePayload;
     const deltaSinceLastEvent = ctx.lastTimestamp != null ? start - ctx.lastTimestamp : 0;
 
     if (event.type === 'text-input') {
@@ -139,14 +141,27 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
         metadata: { deleted: domData.length || 1 },
       });
     } else if (event.type === 'paste') {
+      const payloadLength = pastePayload?.length ?? domData.length ?? 0;
+      const payloadPreview = pastePayload?.preview ?? domData ?? '';
       ctx.pasteCount += 1;
-      ctx.producedChars += domData.length || 0;
+      ctx.producedChars += payloadLength;
       finalizeBurst(ctx);
       const suspicious =
-        domData.length >= 64 || deltaSinceLastEvent >= 5000 || (domData.length >= 24 && deltaSinceLastEvent >= 3000);
+        payloadLength >= 64 ||
+        deltaSinceLastEvent >= 5000 ||
+        (payloadLength >= 24 && deltaSinceLastEvent >= 3000);
       if (suspicious) {
         ctx.suspiciousPasteCount += 1;
       }
+      pasteLog.push({
+        id: event.id,
+        timestamp: event.timestamp,
+        label: suspicious ? 'Unmatched paste' : 'Paste',
+        payloadPreview: payloadPreview.slice(0, 160).replace(/\s+/g, ' '),
+        payloadLength,
+        classification: suspicious ? 'unmatched' : 'likely-internal',
+        idleBeforeMs: deltaSinceLastEvent,
+      });
       pushSegment(ctx, {
         type: 'paste',
         label: suspicious ? 'Unmatched paste' : 'Paste',
@@ -154,7 +169,7 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
         end,
         durationMs: duration,
         metadata: {
-          payloadLength: domData.length,
+          payloadLength,
           idleBeforeMs: deltaSinceLastEvent,
           classification: suspicious ? 'unmatched' : 'likely-internal',
         },
@@ -231,39 +246,57 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
     verdict = 'needs-review';
   }
 
+  const pauseScoreNormalized = clamp(pauseScore, 0, 1);
+  const revisionScoreNormalized = clamp(revisionScore / 0.2, 0, 1);
+  const burstVarianceNormalized = clamp(burstVariance / 0.4, 0, 1);
+  const pasteScoreNormalized = ctx.pasteCount
+    ? clamp(1 - ctx.suspiciousPasteCount / ctx.pasteCount, 0, 1)
+    : 1;
+  const productProcessNormalized = clamp(1 - Math.min(productProcessRatio, 1), 0, 1);
+
   const metrics = [
     {
       key: 'pauseScore',
-      label: 'Pause score',
+      label: 'Pause cadence',
       value: `${Math.round(pauseScore * 100)}%`,
       helperText: `${ctx.macroPauseCount} macro pauses`,
-      trend: pauseScore >= 0.5 ? 'positive' : undefined,
+      trend: pauseScoreNormalized >= 0.5 ? 'positive' : undefined,
+      description: 'Long pauses before sentences imply live thinking; rote transcription rarely stops.',
+      score: pauseScoreNormalized,
     },
     {
       key: 'revisionScore',
       label: 'Revision rate',
       value: `${(revisionScore * 100).toFixed(1)}%`,
       helperText: `${ctx.deleteCount} deletions`,
-      trend: revisionScore >= 0.12 ? 'positive' : 'negative',
+      trend: revisionScoreNormalized >= 0.6 ? 'positive' : 'negative',
+      description: 'Writers who revisit and edit are typically composing, not pasting.',
+      score: revisionScoreNormalized,
     },
     {
       key: 'burstVariance',
-      label: 'Burst variance',
+      label: 'Burst variety',
       value: burstVariance.toFixed(2),
       helperText: `${ctx.bursts.length} bursts analysed`,
+      description: 'Authentic sessions vary in rhythm; uniform bursts suggest copying from another source.',
+      score: burstVarianceNormalized,
     },
     {
       key: 'pasteRisk',
-      label: 'Paste anomalies',
-      value: `${ctx.suspiciousPasteCount}/${ctx.pasteCount}`,
-      helperText: ctx.pasteCount ? 'Potential unmatched payloads' : 'No paste activity',
-      trend: ctx.suspiciousPasteCount ? 'negative' : 'positive',
+      label: 'Paste cleanliness',
+      value: ctx.pasteCount ? `${ctx.pasteCount - ctx.suspiciousPasteCount}/${ctx.pasteCount}` : 'No pastes',
+      helperText: ctx.pasteCount ? 'Clean vs. suspicious payloads' : 'No paste activity',
+      trend: pasteScoreNormalized >= 0.8 ? 'positive' : ctx.suspiciousPasteCount ? 'negative' : undefined,
+      description: 'Unmatched or idle pastes often mean imported text—double-check them.',
+      score: pasteScoreNormalized,
     },
     {
       key: 'productProcess',
-      label: 'Product-process ratio',
+      label: 'Process depth',
       value: productProcessRatio.toFixed(2),
       helperText: `${finalWordCount} final words`,
+      description: 'Lower ratios mean the student typed more than what survived, which signals drafting.',
+      score: productProcessNormalized,
     },
   ];
 
@@ -274,5 +307,6 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
     signals,
     verdict,
     verdictReasoning: reasoning,
+    pastes: pasteLog,
   };
 };

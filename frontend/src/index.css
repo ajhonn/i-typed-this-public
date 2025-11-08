@@ -140,7 +140,7 @@ body {
 }
 
 .session-status--reviewing {
-  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.25);
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);
 }
 
 .session-status-dot {
@@ -163,7 +163,7 @@ body {
 }
 
 .session-status-aura--reviewing {
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.5), rgba(59, 130, 246, 0));
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.45), rgba(59, 130, 246, 0));
 }
 
 @keyframes sessionStatusGlowPulse {
@@ -196,7 +196,7 @@ body {
 @keyframes sessionStatusDotPulseBlue {
   0% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.55);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.45);
   }
   70% {
     transform: scale(1.12);

@@ -1,5 +1,4 @@
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { useEffect } from 'react';
 import PlaybackInsightsDrawer from './PlaybackInsightsDrawer';
 import { SessionProvider, useSession } from '@features/session/SessionProvider';
@@ -29,18 +28,24 @@ const SeedSession = () => {
 };
 
 describe('PlaybackInsightsDrawer', () => {
-  it('toggles visibility of the analysis drawer', async () => {
-    const user = userEvent.setup();
-    render(
+  it('reflects open prop state for the analysis drawer', async () => {
+    const { rerender } = render(
       <SessionProvider>
         <SeedSession />
-        <PlaybackInsightsDrawer />
+        <PlaybackInsightsDrawer open />
       </SessionProvider>
     );
 
-    const toggle = await screen.findByRole('button', { name: /hide analysis/i });
-    expect(screen.getByTestId('session-analysis')).toBeInTheDocument();
-    await user.click(toggle);
-    expect(screen.getByRole('button', { name: /show analysis/i })).toBeInTheDocument();
+    const drawer = await screen.findByTestId('playback-insights');
+    expect(drawer).toHaveAttribute('aria-hidden', 'false');
+
+    rerender(
+      <SessionProvider>
+        <SeedSession />
+        <PlaybackInsightsDrawer open={false} />
+      </SessionProvider>
+    );
+
+    expect(drawer).toHaveAttribute('aria-hidden', 'true');
   });
 });

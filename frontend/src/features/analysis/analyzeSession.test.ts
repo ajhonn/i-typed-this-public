@@ -49,5 +49,6 @@ describe('analyzeSession', () => {
     expect(result.signals.pasteAnomalyCount).toBeGreaterThanOrEqual(0);
     expect(result.segments.some((segment) => segment.type === 'pause')).toBe(true);
     expect(result.segments.some((segment) => segment.type === 'paste')).toBe(true);
+    expect(result.pastes.length).toBeGreaterThan(0);
   });
 });
