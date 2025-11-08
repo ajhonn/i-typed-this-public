@@ -14,9 +14,11 @@
 
 ## Recorder & Writing View
 - [x] Integrate Tiptap editor with ribbon formatting commands.
-- [ ] Implement recorder service capturing text-input, delete, selection changes, undo/redo, copy/cut/paste with clipboard ledger + hashing.
-- [ ] Emit event log + periodic snapshots; expose hooks for components.
-- [ ] Add session controls (download, load, clear) tied to schema.
+- [x] Implement recorder foundations capturing text-input/delete/selection transactions into the event log.
+- [ ] Extend recorder to capture undo/redo history plus copy/cut/paste ledger + hashing.
+- [ ] Emit periodic snapshots; expose hooks for components.
+- [x] Add session download control tied to schema.
+- [ ] Add load + clear controls.
 
 ## Analysis Engine
 - [ ] Implement pause detection (200 ms / 2 s thresholds) and burst grouping.
@@ -25,7 +27,7 @@
 - [ ] Aggregate session summary metrics (pause score, burst variance, paste anomaly count).
 
 ## Playback Experience
-- [ ] Create read-only Tiptap view driven by event log + snapshots.
+- [x] Create basic read-only Tiptap view driven by recorder snapshots (no timeline yet).
 - [ ] Build timeline drawer with segmented bar, play/pause, speed control, scrubber markers.
 - [ ] Render summary cards (duration, words, unmatched pastes) and pause histogram chart.
 - [ ] Highlight text during playback to match timeline segments.

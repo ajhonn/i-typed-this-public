@@ -20,6 +20,7 @@ import '@features/components/tiptap-node/list-node/list-node.scss';
 import '@features/components/tiptap-node/image-node/image-node.scss';
 import '@features/components/tiptap-node/heading-node/heading-node.scss';
 import '@features/components/tiptap-node/paragraph-node/paragraph-node.scss';
+import { useRecorder } from '@features/recorder/useRecorder';
 
 const EDITOR_CLASS = 'simple-editor writer-editor-content';
 
@@ -69,6 +70,8 @@ export const useWriterEditor = () => {
       setEditorHTML(tiptapEditor.getHTML());
     },
   });
+
+  useRecorder(editor);
 
   useEffect(() => {
     if (!editor) return;

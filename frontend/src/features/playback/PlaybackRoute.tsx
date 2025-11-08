@@ -1,4 +1,6 @@
 import ShellLayout from '@features/shell/ShellLayout';
+import SessionInspector from './SessionInspector';
+import PlaybackPlayer from './PlaybackPlayer';
 
 const PlaybackRoute = () => {
   return (
@@ -7,6 +9,8 @@ const PlaybackRoute = () => {
       title="Inspect authentic sessions"
       description="Reconstruct text, timeline segments, and anomaly callouts to evaluate how work unfolded."
     >
+      <PlaybackPlayer />
+      <SessionInspector />
       <section
         className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
         data-testid="playback-route"

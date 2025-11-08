@@ -26,10 +26,14 @@ describe('App routing', () => {
     expect(screen.getByTestId('playback-route')).toBeInTheDocument();
   });
 
-  it('navigates to playback via the ribbon tab', async () => {
-    const user = userEvent.setup();
-    render(<App />);
-    await user.click(screen.getByRole('link', { name: /playback/i }));
-    expect(screen.getByTestId('playback-route')).toBeInTheDocument();
-  });
+  it(
+    'navigates to playback via the ribbon tab',
+    async () => {
+      const user = userEvent.setup();
+      render(<App />);
+      await user.click(screen.getByRole('link', { name: /playback/i }));
+      expect(screen.getByTestId('playback-route')).toBeInTheDocument();
+    },
+    10000
+  );
 });

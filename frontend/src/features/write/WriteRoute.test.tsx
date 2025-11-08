@@ -9,7 +9,7 @@ describe('WriteRoute', () => {
     window.localStorage.clear();
   });
 
-  it('renders the editor surface', async () => {
+  it('renders the editor surface and controls', async () => {
     const router = createMemoryRouter([
       {
         path: '/',
@@ -23,6 +23,7 @@ describe('WriteRoute', () => {
       </SessionProvider>
     );
     expect(await screen.findByTestId('writer-editor')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /download session json/i })).toBeInTheDocument();
   });
 
   it('dismisses the hero modal', async () => {
