@@ -6,10 +6,21 @@ import { createRecorderEvent } from './utils';
 import { useDomRecorder } from './domRecorder';
 
 export const useRecorder = (editor: Editor | null) => {
-  const { appendEvent } = useSession();
+  const { appendEvent, setRecorderState } = useSession();
   const lastTimestampRef = useRef<number | null>(null);
 
   useDomRecorder(editor);
+
+  useEffect(() => {
+    if (!editor) {
+      setRecorderState('idle');
+      return;
+    }
+    setRecorderState('recording');
+    return () => {
+      setRecorderState('idle');
+    };
+  }, [editor, setRecorderState]);
 
   useEffect(() => {
     if (!editor) {

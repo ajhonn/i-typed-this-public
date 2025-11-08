@@ -7,11 +7,15 @@ type SessionState = {
   events: RecorderEvent[];
 };
 
+type RecorderState = 'idle' | 'recording';
+
 type SessionContextValue = {
   session: SessionState;
   setEditorHTML: (html: string) => void;
   appendEvent: (event: RecorderEvent) => void;
   clearSession: () => void;
+  recorderState: RecorderState;
+  setRecorderState: (state: RecorderState) => void;
 };
 
 const SessionContext = createContext<SessionContextValue | undefined>(undefined);
@@ -24,6 +28,7 @@ const INITIAL_SESSION: SessionState = {
 
 export const SessionProvider = ({ children }: PropsWithChildren) => {
   const [session, setSession] = useState<SessionState>(INITIAL_SESSION);
+  const [recorderState, setRecorderState] = useState<RecorderState>('idle');
 
   const setEditorHTML = useCallback((html: string) => {
     setSession((prev) => ({
@@ -56,8 +61,10 @@ export const SessionProvider = ({ children }: PropsWithChildren) => {
       setEditorHTML,
       appendEvent,
       clearSession,
+      recorderState,
+      setRecorderState,
     }),
-    [session, setEditorHTML, appendEvent, clearSession]
+    [session, setEditorHTML, appendEvent, clearSession, recorderState, setRecorderState]
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

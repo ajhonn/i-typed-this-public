@@ -4,17 +4,19 @@ import SessionStatus from './SessionStatus';
 import WriterToolbar from '@features/write/WriterToolbar';
 import { useWriterEditorContext } from '@features/write/WriterEditorContext';
 import PlaybackToolbar from '@features/playback/PlaybackToolbar';
+import { useSession } from '@features/session/SessionProvider';
 
 type RibbonProps = {
   activeTab: ShellTabKey;
 };
 
 const Ribbon = ({ activeTab }: RibbonProps) => {
-  const sessionState = activeTab === 'write' ? 'idle' : 'reviewing';
+  const { recorderState } = useSession();
+  const sessionState = activeTab === 'playback' ? 'reviewing' : recorderState;
   const writerEditor = useWriterEditorContext();
 
   return (
-    <div className="border-b border-slate-200 bg-white shadow-sm">
+    <div className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-6 py-4">
         <div className="flex items-center justify-between gap-6">
           <div className="flex items-center gap-6">

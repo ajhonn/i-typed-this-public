@@ -20,6 +20,13 @@ const PlaybackToolbar = () => {
 
   const formattedTime = useMemo(() => `${(currentTime / 1000).toFixed(2)}s`, [currentTime]);
   const timelineDisabled = playbackEvents.length <= 1 || totalDuration === 0;
+  const idleSkipNote = useMemo(() => {
+    if (!currentSnapshot?.skippedGapMs) {
+      return null;
+    }
+    const seconds = (currentSnapshot.skippedGapMs / 1000).toFixed(1);
+    return `Skipped ${seconds}s idle`;
+  }, [currentSnapshot]);
 
   const handleDownload = () => {
     const blob = new Blob([JSON.stringify(session, null, 2)], { type: 'application/json' });
@@ -83,6 +90,9 @@ const PlaybackToolbar = () => {
         />
         <span className="text-[11px] font-normal normal-case text-slate-500">
           {currentSnapshot?.label ?? 'No events recorded yet'}
+          {idleSkipNote ? (
+            <span className="ml-1 text-[11px] font-medium text-amber-600">{idleSkipNote}</span>
+          ) : null}
         </span>
       </label>
 

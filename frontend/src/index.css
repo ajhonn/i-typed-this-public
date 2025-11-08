@@ -71,3 +71,136 @@ body {
   display: flex;
   gap: 0.25rem;
 }
+
+.playback-frame .ProseMirror {
+  caret-color: inherit;
+}
+
+@keyframes recordingRainbowShift {
+  0% {
+    transform: translateY(-20%);
+    opacity: 0.25;
+    filter: hue-rotate(0deg);
+  }
+  50% {
+    transform: translateY(0%);
+    opacity: 0.45;
+    filter: hue-rotate(60deg);
+  }
+  100% {
+    transform: translateY(-20%);
+    opacity: 0.25;
+    filter: hue-rotate(120deg);
+  }
+}
+
+.recording-rainbow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% -20%, rgba(76, 29, 149, 0.25), transparent 55%),
+    radial-gradient(circle at 20% 10%, rgba(14, 165, 233, 0.25), transparent 60%),
+    radial-gradient(circle at 80% 0%, rgba(249, 115, 22, 0.25), transparent 50%);
+  animation: recordingRainbowShift 12s ease-in-out infinite;
+}
+
+.session-status-wrapper {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.session-status-aura {
+  position: absolute;
+  inset: -8px;
+  border-radius: 9999px;
+  filter: blur(20px);
+  animation: sessionStatusGlowPulse 2.4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.session-status {
+  position: relative;
+  z-index: 1;
+  overflow: visible;
+  background-color: #ffffff;
+  padding: 0.45rem 1rem;
+  border-radius: 9999px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+}
+
+.session-status--recording {
+  box-shadow: 0 10px 30px rgba(248, 113, 113, 0.25);
+}
+
+.session-status--reviewing {
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.25);
+}
+
+.session-status-dot {
+  display: inline-block;
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 9999px;
+}
+
+.session-status-dot--pulse-red {
+  animation: sessionStatusDotPulseRed 1.2s ease-out infinite;
+}
+
+.session-status-dot--pulse-blue {
+  animation: sessionStatusDotPulseBlue 1.2s ease-out infinite;
+}
+
+.session-status-aura--recording {
+  background: radial-gradient(circle, rgba(248, 113, 113, 0.5), rgba(248, 113, 113, 0));
+}
+
+.session-status-aura--reviewing {
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.5), rgba(59, 130, 246, 0));
+}
+
+@keyframes sessionStatusGlowPulse {
+  0% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes sessionStatusDotPulseRed {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.55);
+  }
+  70% {
+    transform: scale(1.12);
+    box-shadow: 0 0 0 10px rgba(248, 113, 113, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(248, 113, 113, 0);
+  }
+}
+
+@keyframes sessionStatusDotPulseBlue {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.55);
+  }
+  70% {
+    transform: scale(1.12);
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}

@@ -11,6 +11,7 @@ export type PlaybackSnapshot = {
   selection: { from: number; to: number };
   source: RecorderEvent['source'];
   elapsedMs: number;
+  skippedGapMs?: number;
 };
 
 type PlaybackControllerContextValue = {
@@ -30,6 +31,9 @@ type PlaybackControllerContextValue = {
 const PlaybackControllerContext = createContext<PlaybackControllerContextValue | undefined>(undefined);
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max));
+const MIN_EVENT_DURATION_MS = 16;
+const IDLE_GAP_THRESHOLD_MS = 4000;
+const COMPRESSED_GAP_DURATION_MS = 600;
 
 const derivePlaybackEvents = (events: RecorderEvent[], editorHTML: string): PlaybackSnapshot[] => {
   if (!events.length) {
@@ -70,7 +74,10 @@ const derivePlaybackEvents = (events: RecorderEvent[], editorHTML: string): Play
   let elapsed = 0;
   return sorted.map(({ event }, index) => {
     const next = sorted[index + 1]?.event;
-    const duration = next ? Math.max(next.timestamp - event.timestamp, 16) : 500;
+    const rawDuration = next ? Math.max(next.timestamp - event.timestamp, MIN_EVENT_DURATION_MS) : 500;
+    const exceedsIdleThreshold = next ? next.timestamp - event.timestamp > IDLE_GAP_THRESHOLD_MS : false;
+    const duration = exceedsIdleThreshold ? COMPRESSED_GAP_DURATION_MS : rawDuration;
+    const skippedGapMs = exceedsIdleThreshold ? rawDuration - COMPRESSED_GAP_DURATION_MS : 0;
     const currentElapsed = elapsed;
     elapsed += duration;
 
@@ -82,6 +89,7 @@ const derivePlaybackEvents = (events: RecorderEvent[], editorHTML: string): Play
       selection: event.meta.selection,
       source: event.source,
       elapsedMs: currentElapsed,
+      skippedGapMs: skippedGapMs || undefined,
     };
   });
 };
