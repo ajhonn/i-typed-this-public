@@ -146,32 +146,48 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
       ctx.pasteCount += 1;
       ctx.producedChars += payloadLength;
       finalizeBurst(ctx);
+      const ledgerMatch = pastePayload?.source === 'ledger';
       const suspicious =
-        payloadLength >= 64 ||
-        deltaSinceLastEvent >= 5000 ||
-        (payloadLength >= 24 && deltaSinceLastEvent >= 3000);
+        !ledgerMatch &&
+        (payloadLength >= 64 ||
+          deltaSinceLastEvent >= 5000 ||
+          (payloadLength >= 24 && deltaSinceLastEvent >= 3000));
       if (suspicious) {
         ctx.suspiciousPasteCount += 1;
       }
+      const classification: PasteInsight['classification'] = ledgerMatch
+        ? 'internal-copy'
+        : suspicious
+          ? 'unmatched'
+          : 'likely-internal';
+      const label = ledgerMatch ? 'Internal paste' : suspicious ? 'Unmatched paste' : 'Paste';
+      const ledgerInfo = ledgerMatch
+        ? {
+            copyEventId: pastePayload?.matchedCopyId,
+            ageMs: pastePayload?.ledgerAgeMs,
+          }
+        : undefined;
       pasteLog.push({
         id: event.id,
         timestamp: event.timestamp,
-        label: suspicious ? 'Unmatched paste' : 'Paste',
+        label,
         payloadPreview: payloadPreview.slice(0, 160).replace(/\s+/g, ' '),
         payloadLength,
-        classification: suspicious ? 'unmatched' : 'likely-internal',
+        classification,
         idleBeforeMs: deltaSinceLastEvent,
+        ledgerMatch: ledgerInfo,
       });
       pushSegment(ctx, {
         type: 'paste',
-        label: suspicious ? 'Unmatched paste' : 'Paste',
+        label,
         start,
         end,
         durationMs: duration,
         metadata: {
           payloadLength,
           idleBeforeMs: deltaSinceLastEvent,
-          classification: suspicious ? 'unmatched' : 'likely-internal',
+          classification,
+          ledgerMatch: ledgerInfo,
         },
       });
     } else if (event.type === 'selection-change') {

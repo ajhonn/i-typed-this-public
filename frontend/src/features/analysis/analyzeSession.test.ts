@@ -17,6 +17,8 @@ const mockEvent = (overrides: Partial<RecorderEvent>): RecorderEvent => ({
     html: overrides.meta?.html ?? '<p></p>',
     durationMs: overrides.meta?.durationMs,
     domInput: overrides.meta?.domInput,
+    pastePayload: overrides.meta?.pastePayload,
+    clipboard: overrides.meta?.clipboard,
   },
 });
 
@@ -50,5 +52,31 @@ describe('analyzeSession', () => {
     expect(result.segments.some((segment) => segment.type === 'pause')).toBe(true);
     expect(result.segments.some((segment) => segment.type === 'paste')).toBe(true);
     expect(result.pastes.length).toBeGreaterThan(0);
+  });
+
+  it('classifies ledger-matched pastes as internal copies', () => {
+    const events: RecorderEvent[] = [
+      mockEvent({
+        type: 'paste',
+        timestamp: 5000,
+        meta: {
+          docSize: 20,
+          selection: { from: 20, to: 20 },
+          html: '<p>Example</p>',
+          pastePayload: {
+            length: 6,
+            preview: 'import',
+            source: 'ledger',
+            matchedCopyId: 'copy-1',
+            ledgerAgeMs: 800,
+          },
+        },
+      }),
+    ];
+
+    const result = analyzeSession(events, '<p>Example</p>');
+    expect(result.pastes[0]?.classification).toBe('internal-copy');
+    expect(result.pastes[0]?.ledgerMatch?.copyEventId).toBe('copy-1');
+    expect(result.signals.pasteAnomalyCount).toBe(0);
   });
 });

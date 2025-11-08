@@ -6,6 +6,12 @@ const verdictCopy: Record<string, { label: string; tone: string }> = {
   'high-risk': { label: 'High transcription risk', tone: 'text-rose-700 bg-rose-50' },
 };
 
+const pasteClassificationCopy: Record<string, string> = {
+  'internal-copy': 'Internal copy match',
+  'likely-internal': 'Likely internal',
+  unmatched: 'Unmatched',
+};
+
 const metricDescriptions: Record<string, string> = {
   pauseScore: 'Macro pauses (≥2s) before bursts suggest live composition rather than transcription.',
   revisionScore: 'Authentic drafting produces revisions: deletions/undo activity relative to typing.',
@@ -81,21 +87,27 @@ const SessionAnalysisPanel = () => {
         <p className="text-xs uppercase tracking-wide text-slate-500">Paste ledger</p>
         {analysis.pastes.length ? (
           <div className="mt-2 space-y-3 text-sm text-slate-700">
-            {analysis.pastes.map((paste) => (
-              <div key={paste.id} className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
-                <div className="flex items-center justify-between gap-2 text-xs uppercase tracking-wide">
-                  <span className="font-semibold text-slate-600">{paste.label}</span>
-                  <span className="text-slate-400">{new Date(paste.timestamp).toLocaleTimeString()}</span>
+            {analysis.pastes.map((paste) => {
+              const classificationLabel = pasteClassificationCopy[paste.classification] ?? paste.classification;
+              const ledgerAge =
+                paste.ledgerMatch?.ageMs != null ? `${Math.round(paste.ledgerMatch.ageMs / 100) / 10}s earlier` : null;
+              return (
+                <div key={paste.id} className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
+                  <div className="flex items-center justify-between gap-2 text-xs uppercase tracking-wide">
+                    <span className="font-semibold text-slate-600">{paste.label}</span>
+                    <span className="text-slate-400">{new Date(paste.timestamp).toLocaleTimeString()}</span>
+                  </div>
+                  <p className="mt-2 text-sm text-slate-800">
+                    {paste.payloadPreview || <span className="italic text-slate-500">Empty payload</span>}
+                    {paste.payloadLength > paste.payloadPreview.length ? '…' : ''}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {paste.payloadLength} chars · idle {Math.round(paste.idleBeforeMs / 100) / 10}s · {classificationLabel}
+                    {ledgerAge ? ` (copied ${ledgerAge})` : ''}
+                  </p>
                 </div>
-                <p className="mt-2 text-sm text-slate-800">
-                  {paste.payloadPreview || <span className="italic text-slate-500">Empty payload</span>}
-                  {paste.payloadLength > paste.payloadPreview.length ? '…' : ''}
-                </p>
-                <p className="mt-1 text-xs text-slate-500">
-                  {paste.payloadLength} chars · idle {Math.round(paste.idleBeforeMs / 100) / 10}s · {paste.classification}
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <p className="mt-2 text-sm text-slate-600">No paste activity recorded for this session.</p>

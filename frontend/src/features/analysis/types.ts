@@ -45,8 +45,12 @@ export type PasteInsight = {
   label: string;
   payloadPreview: string;
   payloadLength: number;
-  classification: 'likely-internal' | 'unmatched';
+  classification: 'internal-copy' | 'likely-internal' | 'unmatched';
   idleBeforeMs: number;
+  ledgerMatch?: {
+    copyEventId?: string;
+    ageMs?: number;
+  };
 };
 
 export type SessionAnalysis = {

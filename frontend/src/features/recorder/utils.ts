@@ -1,7 +1,7 @@
 import type { Transaction } from '@tiptap/pm/state';
 import type { RecorderEvent, RecorderEventType } from './types';
 
-const createEventId = () => {
+export const createRecorderEventId = () => {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 };
 
@@ -36,7 +36,7 @@ export const createRecorderEvent = (
   durationMs?: number
 ): RecorderEvent => {
   return {
-    id: createEventId(),
+    id: createRecorderEventId(),
     type: detectEventType(transaction),
     timestamp: Date.now(),
     source: 'transaction',

@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react';
 import type { Editor } from '@tiptap/react';
 import { useSession } from '@features/session/SessionProvider';
 import type { RecorderEvent } from './types';
+import { createRecorderEventId } from './utils';
+import { recordClipboardEntry } from './clipboardLedger';
 
 const DOM_EVENT_TYPES = new Set([
   'insertText',
@@ -36,7 +38,7 @@ export const useDomRecorder = (editor: Editor | null) => {
             : 'text-input';
 
       const domEvent: RecorderEvent = {
-        id: `${now.toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
+        id: createRecorderEventId(),
         type: domEventType,
         source: 'dom',
         timestamp: now,
@@ -62,7 +64,70 @@ export const useDomRecorder = (editor: Editor | null) => {
       appendEvent(domEvent);
     };
 
+    const handleClipboard = (action: 'copy' | 'cut') => () => {
+      const selection = editor.state.selection;
+      if (selection.empty) {
+        return;
+      }
+      const text = editor.state.doc.textBetween(selection.from, selection.to, '\n');
+      if (!text) {
+        return;
+      }
+
+      const timestamp = Date.now();
+      const id = createRecorderEventId();
+      const entry = recordClipboardEntry({
+        id,
+        action,
+        text,
+        selection: { from: selection.from, to: selection.to },
+        timestamp,
+      });
+      if (!entry) {
+        return;
+      }
+
+      const clipboardEvent: RecorderEvent = {
+        id,
+        type: action,
+        source: 'dom',
+        timestamp,
+        meta: {
+          docSize: editor.state.doc.content.size,
+          stepTypes: [],
+          selection: { from: selection.from, to: selection.to },
+          docChanged: false,
+          html: editor.getHTML(),
+          clipboard: {
+            action,
+            length: entry.length,
+            preview: entry.preview,
+            hash: entry.hash,
+          },
+        },
+      };
+
+      if (import.meta.env.DEV) {
+        console.info('[Recorder] Clipboard event captured', {
+          action,
+          length: entry.length,
+          preview: entry.preview.slice(0, 40),
+        });
+      }
+
+      appendEvent(clipboardEvent);
+    };
+
+    const handleCopy = handleClipboard('copy');
+    const handleCut = handleClipboard('cut');
+
     dom.addEventListener('input', handleInput);
-    return () => dom.removeEventListener('input', handleInput);
+    dom.addEventListener('copy', handleCopy);
+    dom.addEventListener('cut', handleCut);
+    return () => {
+      dom.removeEventListener('input', handleInput);
+      dom.removeEventListener('copy', handleCopy);
+      dom.removeEventListener('cut', handleCut);
+    };
   }, [editor, appendEvent]);
 };
