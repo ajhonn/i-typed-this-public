@@ -7,10 +7,10 @@
 - [ ] Define session JSON schema shared by recorder, playback, and future backend (`packages/session-schema`).
 
 ## Foundation & Layout
-- [ ] Set up routing (`/write`, `/playback`, `/learn`) and shared session context/store.
-- [ ] Implement ribbon shell with tabs: Home, Session, Insights, Learn.
-- [ ] Apply page-style centered layout and focus mode toggle.
-- [ ] Build dismissible hero modal and Learn page (use content from `docs/frontend-product-story.md`).
+- [x] Set up routing (`/write`, `/playback`, `/learn`) and shared session context/store.
+- [x] Implement ribbon shell with tabs: Home, Session, Insights, Learn.
+- [x] Apply page-style centered layout and focus mode toggle.
+- [x] Build dismissible hero modal and Learn page (use content from `docs/frontend-product-story.md`).
 
 ## Recorder & Writing View
 - [ ] Integrate Tiptap editor with ribbon formatting commands.

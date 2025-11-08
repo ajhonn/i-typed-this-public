@@ -32,10 +32,18 @@ cd backend && uv run pytest       # Run backend tests with ephemeral SQLite by d
 - Follow Conventional Commits (`feat:`, `fix:`, `chore:`…) for clarity and changelog generation; squash trivial WIP commits before pushing.
 - Each PR should map to a single GitHub issue, include a succinct summary, test plan output, and screenshots or HAR captures when UI flows or API responses shift.
 - Keep PRs under ~400 changed lines; coordinate cross-repo updates in advance when touching shared packages or protocol docs.
+- Agents should stage code but leave commits to the human reviewer. After each milestone, provide (1) a succinct verification checklist (tests, manual steps) and (2) a suggested Conventional Commit message the human can run once satisfied.
+- Favor small, self-contained commits (e.g., one per button/feature/doc tweak) so every change is testable in isolation and easy to review or revert. Flag natural commit boundaries when sharing status updates.
 
 ## Documentation & Decision Making
 - Prefer official documentation for installation, configuration, and API references; when unsure, ask for the relevant docs instead of improvising so the human can provide the latest source.
+- Before adding or upgrading dependencies, consult the official docs/release notes and note the reference in PR descriptions or doc updates.
 - Capture methodology, rationale, and trade-offs in `docs/` alongside implementation updates so readers understand *why* changes were made, not just *what* changed.
 - When adding new tooling or dependencies, note the purpose, configuration surface, and maintenance plan in the relevant doc (e.g., `docs/architecture.md` or feature-specific ADRs).
 - Treat `docs/frontend-mvp-concept.md` (and its companion specs) as the source of truth for client architecture and evolution; update those documents in lockstep with code changes.
 - Use `docs/frontend-mvp-task-list.md` to coordinate implementation steps and testing expectations so agents stay aligned.
+
+## Communication & Rationale
+- When reporting progress or proposing changes, explicitly cover **why** the work matters (tie it back to the MVP plan/task list), **what** is being changed, and **how** it will be executed so humans can track the reasoning.
+- Reference the relevant docs, specs, or tickets whenever outlining the plan to ground conversations in shared context.
+- After every meaningful change/commit suggestion, offer to capture an ELI5 recap in `docs/learning/` (even though it’s gitignored) and propose at least one new topic that isn’t documented yet so the human can request it.

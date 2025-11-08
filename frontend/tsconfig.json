@@ -19,6 +19,7 @@
     "paths": {
       "@features/*": ["features/*"],
       "@components/*": ["components/*"],
+      "@routes/*": ["routes/*"],
       "@test/*": ["test/*"]
     },
     "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom", "node"]

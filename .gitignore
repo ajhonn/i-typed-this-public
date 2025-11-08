@@ -81,6 +81,7 @@ out
 # Nuxt.js build / generate output
 .nuxt
 dist
+docs/learning/
 
 # Gatsby files
 .cache/
@@ -150,3 +151,4 @@ __pycache__/
 .envrc
 .python-version
 .uv/
+.pre-commit-cache/.lock
