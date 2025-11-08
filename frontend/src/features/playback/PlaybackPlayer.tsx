@@ -74,6 +74,7 @@ const PlaybackPlayer = () => {
     content: playbackEvents[0]?.html ?? '<p></p>',
     editable: false,
   });
+  const [cursorCoords, setCursorCoords] = useState<{ top: number; left: number } | null>(null);
 
   useEffect(() => {
     setCurrentTime(0);
@@ -83,14 +84,36 @@ const PlaybackPlayer = () => {
   useEffect(() => {
     if (!editor) return;
     const currentIndex = playbackEvents.findIndex((event) => event.elapsedMs >= currentTime);
-    const html = playbackEvents[currentIndex]?.html ?? playbackEvents.at(-1)?.html ?? '<p></p>';
+    const snapshot = playbackEvents[currentIndex] ?? playbackEvents.at(-1);
+    const html = snapshot?.html ?? '<p></p>';
     editor.commands.setContent(html, false);
 
-    // Scroll to keep caret near view bottom
+    const selection = snapshot?.selection ?? { from: 0, to: 0 };
+    const clampedSelection = {
+      from: Math.max(0, Math.min(selection.from, editor.state.doc.content.size)),
+      to: Math.max(0, Math.min(selection.to, editor.state.doc.content.size)),
+    };
+    editor.chain().setTextSelection(clampedSelection).run();
+
     const editorEl = editor.view.dom as HTMLElement;
-    const root = editorEl.closest('.playback-frame');
+    const root = editorEl.closest('.playback-frame') as HTMLElement | null;
+    setCursorCoords(null);
     if (root) {
-      root.scrollTop = editorEl.scrollHeight;
+      const coords = editor.view.coordsAtPos(clampedSelection.from);
+      const rootRect = root.getBoundingClientRect();
+      const top = coords.top - rootRect.top + root.scrollTop;
+      const left = coords.left - rootRect.left + root.scrollLeft;
+      setCursorCoords({ top, left });
+      const relativeTop = top;
+      const margin = 48;
+      if (relativeTop < root.scrollTop + margin) {
+        root.scrollTop = Math.max(relativeTop - margin, 0);
+      } else if (relativeTop > root.scrollTop + root.clientHeight - margin) {
+        root.scrollTop = Math.min(
+          relativeTop - root.clientHeight + margin,
+          root.scrollHeight
+        );
+      }
     }
   }, [editor, currentTime, playbackEvents]);
 
@@ -170,9 +193,9 @@ const PlaybackPlayer = () => {
         </div>
       </div>
 
-      <div className="playback-frame rounded-2xl border border-slate-100 bg-slate-50 p-4 max-h-[480px] overflow-auto">
+      <div className="playback-frame relative rounded-2xl border border-slate-100 bg-slate-50 p-4 max-h-[480px] overflow-auto">
         <EditorContent editor={editor} />
-        <PlaybackCursor selection={currentSnapshot?.selection ?? { from: 0, to: 0 }} />
+        {cursorCoords ? <PlaybackCursor top={cursorCoords.top} left={cursorCoords.left} /> : null}
       </div>
     </section>
   );

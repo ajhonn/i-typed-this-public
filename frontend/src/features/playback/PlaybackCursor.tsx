@@ -1,15 +1,16 @@
 type PlaybackCursorProps = {
-  selection: {
-    from: number;
-    to: number;
-  };
+  top: number;
+  left: number;
 };
 
-const PlaybackCursor = ({ selection }: PlaybackCursorProps) => {
-  // Placeholder component until we hook into ProseMirror decorations.
+const PlaybackCursor = ({ top, left }: PlaybackCursorProps) => {
   return (
-    <div className="text-xs text-slate-500">
-      Selection from {selection.from} to {selection.to}
+    <div
+      aria-hidden
+      className="absolute pointer-events-none"
+      style={{ top, left }}
+    >
+      <span className="block h-6 w-0.5 animate-pulse bg-slate-50" />
     </div>
   );
 };

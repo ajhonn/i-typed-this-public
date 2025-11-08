@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { useEffect } from 'react';
 import { SessionProvider, useSession } from '@features/session/SessionProvider';
 import PlaybackPlayer from './PlaybackPlayer';
@@ -36,5 +36,18 @@ describe('PlaybackPlayer', () => {
     expect(await screen.findByText(/Playback/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Play/i })).toBeInTheDocument();
     expect(screen.getByLabelText(/Playback speed/i)).toBeInTheDocument();
+  });
+
+  it('renders the playback cursor overlay', async () => {
+    render(
+      <SessionProvider>
+        <SeedPlayback />
+        <PlaybackPlayer />
+      </SessionProvider>
+    );
+
+    await waitFor(() => {
+      expect(document.querySelector('.playback-frame .animate-pulse')).not.toBeNull();
+    });
   });
 });

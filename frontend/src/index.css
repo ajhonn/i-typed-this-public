@@ -71,3 +71,7 @@ body {
   display: flex;
   gap: 0.25rem;
 }
+
+.playback-frame .ProseMirror {
+  caret-color: #f8fafc; /* match background so caret stays hidden */
+}
