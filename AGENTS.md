@@ -46,4 +46,4 @@ cd backend && uv run pytest       # Run backend tests with ephemeral SQLite by d
 ## Communication & Rationale
 - When reporting progress or proposing changes, explicitly cover **why** the work matters (tie it back to the MVP plan/task list), **what** is being changed, and **how** it will be executed so humans can track the reasoning.
 - Reference the relevant docs, specs, or tickets whenever outlining the plan to ground conversations in shared context.
-- After every meaningful change/commit suggestion, offer to capture an ELI5 recap in `docs/learning/` (even though it’s gitignored) and propose at least one new topic that isn’t documented yet so the human can request it.
+- After every meaningful change/commit suggestion, offer to capture an ELI5 recap in `docs/learning/` (even though it’s gitignored) and propose at least one new topic that isn’t documented yet so the human can request it. Use `docs/learning/README.md` as the quick index to avoid re-reading every note.
