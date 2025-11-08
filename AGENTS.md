@@ -39,3 +39,7 @@ cd backend && uv run pytest       # Run backend tests with ephemeral SQLite by d
 - When adding new tooling or dependencies, note the purpose, configuration surface, and maintenance plan in the relevant doc (e.g., `docs/architecture.md` or feature-specific ADRs).
 - Treat `docs/frontend-mvp-concept.md` (and its companion specs) as the source of truth for client architecture and evolution; update those documents in lockstep with code changes.
 - Use `docs/frontend-mvp-task-list.md` to coordinate implementation steps and testing expectations so agents stay aligned.
+
+## Communication & Rationale
+- When reporting progress or proposing changes, explicitly cover **why** the work matters (tie it back to the MVP plan/task list), **what** is being changed, and **how** it will be executed so humans can track the reasoning.
+- Reference the relevant docs, specs, or tickets whenever outlining the plan to ground conversations in shared context.
