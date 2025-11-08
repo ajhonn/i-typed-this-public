@@ -33,6 +33,7 @@ cd backend && uv run pytest       # Run backend tests with ephemeral SQLite by d
 - Each PR should map to a single GitHub issue, include a succinct summary, test plan output, and screenshots or HAR captures when UI flows or API responses shift.
 - Keep PRs under ~400 changed lines; coordinate cross-repo updates in advance when touching shared packages or protocol docs.
 - Agents should stage code but leave commits to the human reviewer. After each milestone, provide (1) a succinct verification checklist (tests, manual steps) and (2) a suggested Conventional Commit message the human can run once satisfied.
+- Favor small, self-contained commits (e.g., one per button/feature/doc tweak) so every change is testable in isolation and easy to review or revert. Flag natural commit boundaries when sharing status updates.
 
 ## Documentation & Decision Making
 - Prefer official documentation for installation, configuration, and API references; when unsure, ask for the relevant docs instead of improvising so the human can provide the latest source.
