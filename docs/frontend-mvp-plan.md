@@ -35,6 +35,8 @@
   - Toolbar mirrors default WYSIWYG commands (bold, italic, underline, headings, lists).
   - Page container restricts max line length and centers content.
   - Recorder hook attaches when editor mounts; shows subtle indicator if recording is active.
+  - Nice-to-have: paginate the canvas to A4-sized slices with faint break indicators once writing exceeds one “page.”
+  - Nice-to-have: expose an “advanced controls” toggle that expands the ribbon with blockquote/code/image tools when needed.
 - Playback View
   - Editor renders read-only content, advancing according to event log.
   - Timeline pane (right-hand side) displays stacked segments with colour legend.

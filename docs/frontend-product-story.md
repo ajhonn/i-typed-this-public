@@ -22,7 +22,7 @@
 3. **Analyse** — Simple charts reveal peak speeds, rhythm, and flow, making it obvious when content appeared unnaturally fast or without revisions.
 
 ### Usage Paths
-- **Students**: Compose in focus mode, download the session file, and submit it with their essay as proof of authentic work.
+- **Students**: Compose in the built-in editor, download the session file, and submit it with their essay as proof of authentic work.
 - **Teachers**: Load session files or demos, replay the writing process, and inspect analysis summaries before making integrity calls.
 
 ## Future “Fun” & Engagement Ideas
