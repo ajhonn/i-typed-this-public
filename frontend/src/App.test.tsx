@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { RouterProvider, createMemoryRouter } from 'react-router';
 import App from './App';
 import { appRoutes } from './routes/AppRouter';
@@ -15,12 +16,15 @@ describe('App routing', () => {
     const router = createMemoryRouter(appRoutes, {
       initialEntries: [ROUTES.playback],
     });
-    render(
-      <div className="min-h-screen bg-slate-950 text-slate-100">
-        <RouterProvider router={router} />
-      </div>
-    );
+    render(<RouterProvider router={router} />);
 
+    expect(screen.getByTestId('playback-route')).toBeInTheDocument();
+  });
+
+  it('navigates to playback via the ribbon tab', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole('link', { name: /playback/i }));
     expect(screen.getByTestId('playback-route')).toBeInTheDocument();
   });
 });
