@@ -67,6 +67,11 @@ All rules should be tunable via configuration so thresholds can evolve without c
 - Feedback loop: should students receive real-time warnings (risk of gaming) or only educator-facing summaries?
 - Data export: what format (JSON schema) will support future ML training while preserving anonymity?
 
+## 8. Implementation Status (MVP shell)
+- Segmentation, burst stats, revision counters, and heuristic verdicts now run client-side via `useSessionAnalysis`.
+- Paste events rely on DOM `insertFromPaste` hooks; unmatched classification currently uses payload size + idle-time heuristics until the clipboard ledger ships.
+- Playback renders a dedicated “Authorship signals” panel showing pause score, revision rate, burst variance, paste anomalies, and narrative reasoning so reviewers understand the verdict.
+
 ## 8. References
 - Crossley, S., Holmes, L., Tian, Y., Morris, W., & Choi, J. S. (2024). *Plagiarism Detection Using Keystroke Logs.*
 - Conijn, R., Roeser, J., & van Zaanen, M. (2019). *Understanding the keystroke log: the effect of writing task on keystroke features.*

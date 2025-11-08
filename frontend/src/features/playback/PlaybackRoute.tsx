@@ -1,6 +1,7 @@
 import ShellLayout from '@features/shell/ShellLayout';
 import PlaybackPlayer from './PlaybackPlayer';
 import { PlaybackProvider } from './PlaybackControllerContext';
+import PlaybackInsightsDrawer from './PlaybackInsightsDrawer';
 
 const PlaybackRoute = () => {
   return (
@@ -12,6 +13,7 @@ const PlaybackRoute = () => {
         showHeader={false}
       >
         <PlaybackPlayer />
+        <PlaybackInsightsDrawer />
       </ShellLayout>
     </PlaybackProvider>
   );

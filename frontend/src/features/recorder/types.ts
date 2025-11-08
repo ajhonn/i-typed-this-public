@@ -1,6 +1,6 @@
 export type RecorderEventSource = 'dom' | 'transaction';
 
-export type RecorderEventType = 'text-input' | 'delete' | 'selection-change' | 'transaction';
+export type RecorderEventType = 'text-input' | 'delete' | 'selection-change' | 'transaction' | 'paste';
 
 export type RecorderEvent = {
   id: string;

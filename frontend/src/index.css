@@ -114,9 +114,9 @@ body {
 
 .session-status-aura {
   position: absolute;
-  inset: -8px;
+  inset: -10px;
   border-radius: 9999px;
-  filter: blur(20px);
+  filter: blur(22px);
   animation: sessionStatusGlowPulse 2.4s ease-in-out infinite;
   pointer-events: none;
   z-index: 0;
@@ -126,10 +126,13 @@ body {
   position: relative;
   z-index: 1;
   overflow: visible;
-  background-color: #ffffff;
-  padding: 0.45rem 1rem;
+  background-color: #fff;
+  padding: 0.55rem 1.25rem;
   border-radius: 9999px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .session-status--recording {

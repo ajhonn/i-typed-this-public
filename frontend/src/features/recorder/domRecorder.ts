@@ -28,9 +28,16 @@ export const useDomRecorder = (editor: Editor | null) => {
       lastTimestampRef.current = now;
 
       const selection = editor.state.selection;
+      const domEventType =
+        event.inputType === 'insertFromPaste'
+          ? 'paste'
+          : event.inputType.startsWith('delete')
+            ? 'delete'
+            : 'text-input';
+
       const domEvent: RecorderEvent = {
         id: `${now.toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
-        type: event.inputType.startsWith('delete') ? 'delete' : 'text-input',
+        type: domEventType,
         source: 'dom',
         timestamp: now,
         meta: {
