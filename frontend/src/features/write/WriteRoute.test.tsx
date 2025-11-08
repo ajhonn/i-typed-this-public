@@ -2,13 +2,14 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { RouterProvider, createMemoryRouter } from 'react-router';
 import WriteRoute from './WriteRoute';
+import { SessionProvider } from '@features/session/SessionProvider';
 
 describe('WriteRoute', () => {
   beforeEach(() => {
     window.localStorage.clear();
   });
 
-  it('renders primary call to action', () => {
+  it('renders the editor surface', async () => {
     const router = createMemoryRouter([
       {
         path: '/',
@@ -16,8 +17,12 @@ describe('WriteRoute', () => {
       },
     ]);
 
-    render(<RouterProvider router={router} />);
-    expect(screen.getByRole('heading', { name: /observe the writing journey/i })).toBeInTheDocument();
+    render(
+      <SessionProvider>
+        <RouterProvider router={router} />
+      </SessionProvider>
+    );
+    expect(await screen.findByTestId('writer-editor')).toBeInTheDocument();
   });
 
   it('dismisses the hero modal', async () => {
@@ -29,8 +34,12 @@ describe('WriteRoute', () => {
     ]);
 
     const user = userEvent.setup();
-    render(<RouterProvider router={router} />);
-    expect(screen.getByTestId('hero-modal')).toBeInTheDocument();
+    render(
+      <SessionProvider>
+        <RouterProvider router={router} />
+      </SessionProvider>
+    );
+    expect(await screen.findByTestId('hero-modal')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: /start writing/i }));
     expect(screen.queryByTestId('hero-modal')).not.toBeInTheDocument();
   });

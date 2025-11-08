@@ -12,13 +12,13 @@ const LABELS: Record<SessionState, string> = {
 
 const DOT_STYLES: Record<SessionState, string> = {
   idle: 'bg-slate-400',
-  recording: 'bg-rose-400 animate-pulse',
-  reviewing: 'bg-sky-400',
+  recording: 'bg-rose-500 animate-pulse',
+  reviewing: 'bg-sky-500',
 };
 
 const SessionStatus = ({ state }: SessionStatusProps) => {
   return (
-    <div className="inline-flex items-center gap-2 rounded-full border border-slate-800 bg-slate-950/80 px-3 py-1 text-xs font-medium uppercase tracking-wide text-slate-200">
+    <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
       <span className={`h-2 w-2 rounded-full ${DOT_STYLES[state]}`} aria-hidden />
       {LABELS[state]}
     </div>
