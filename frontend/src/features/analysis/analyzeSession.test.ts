@@ -132,4 +132,32 @@ describe('analyzeSession', () => {
     const result = analyzeSession(events, '<p>Hi there</p>');
     expect(result.pastes[0]?.classification).toBe('unmatched');
   });
+
+  it('counts transaction-only deletes as revisions when no DOM event exists', () => {
+    const events: RecorderEvent[] = [
+      mockEvent({
+        timestamp: 0,
+        meta: { html: '<p>Hi</p>', domInput: { inputType: 'insertText', data: 'Hi' }, docSize: 2, selection: { from: 2, to: 2 } },
+      }),
+      mockEvent({
+        id: 'txn-delete',
+        type: 'delete',
+        source: 'transaction',
+        timestamp: 2000,
+        meta: {
+          docSize: 0,
+          selection: { from: 0, to: 0 },
+          docChanged: true,
+          stepTypes: ['replace'],
+          html: '<p></p>',
+        },
+      }),
+    ];
+
+    const result = analyzeSession(events, '<p></p>');
+    const revisions = result.segments.filter((segment) => segment.type === 'revision');
+    expect(revisions).toHaveLength(1);
+    const deleted = revisions[0]?.metadata?.deleted as number | undefined;
+    expect(deleted).toBeGreaterThanOrEqual(1);
+  });
 });

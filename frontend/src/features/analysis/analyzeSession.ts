@@ -95,7 +95,11 @@ const pushSegment = (
 export const analyzeSession = (events: RecorderEvent[], finalHtml: string): SessionAnalysis => {
   const sortedEvents = [...events].sort((a, b) => a.timestamp - b.timestamp);
   const shouldSkipEvent = (event: RecorderEvent) => {
-    if (event.source === 'transaction' && (event.type === 'text-input' || event.type === 'delete')) {
+    if (
+      event.source === 'transaction' &&
+      (event.type === 'text-input' || event.type === 'delete') &&
+      event.meta.correlatedDomEventId
+    ) {
       return true;
     }
     if (event.source === 'dom' && event.type === 'paste') {
@@ -112,8 +116,14 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
   let processArea = 0;
   let productArea = 0;
 
+  let previousDocSize: number | null = null;
+
   analyzableEvents.forEach((event, index) => {
-    if (event.source === 'transaction' && (event.type === 'text-input' || event.type === 'delete')) {
+    if (
+      event.source === 'transaction' &&
+      (event.type === 'text-input' || event.type === 'delete') &&
+      event.meta.correlatedDomEventId
+    ) {
       return;
     }
     if (event.source === 'dom' && event.type === 'paste') {
@@ -150,10 +160,17 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
     const domData = event.meta.domInput?.data ?? '';
     const pastePayload = event.meta.pastePayload;
     const deltaSinceLastEvent = ctx.lastTimestamp != null ? start - ctx.lastTimestamp : 0;
+    const docSizeBefore = previousDocSize ?? event.meta.docSize;
+    const docSizeAfter = event.meta.docSize;
+    const producedDelta = Math.max(0, docSizeAfter - docSizeBefore);
+    const deletedDelta = Math.max(0, docSizeBefore - docSizeAfter);
+    const domText = typeof domData === 'string' ? domData : '';
+    const domTextLength = domText.length;
 
     if (event.type === 'text-input') {
       ctx.textInputCount += 1;
-      ctx.producedChars += domData.length || 1;
+      const charCount = domTextLength > 0 ? domTextLength : Math.max(1, producedDelta);
+      ctx.producedChars += charCount;
       if (!ctx.currentBurst) {
         ctx.currentBurst = {
           start,
@@ -165,7 +182,7 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
       }
       ctx.currentBurst.end = end;
       ctx.currentBurst.durationMs += duration;
-      ctx.currentBurst.charCount += domData.length || 1;
+      ctx.currentBurst.charCount += charCount;
       ctx.currentBurst.eventCount += 1;
       pushSegment(ctx, {
         type: 'typing',
@@ -173,11 +190,12 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
         start,
         end,
         durationMs: duration,
-        metadata: { charCount: domData.length || 1 },
+        metadata: { charCount },
       });
     } else if (event.type === 'delete') {
       ctx.deleteCount += 1;
-      ctx.deletedChars += domData.length || 1;
+      const deleted = domTextLength > 0 ? domTextLength : Math.max(1, deletedDelta);
+      ctx.deletedChars += deleted;
       finalizeBurst(ctx);
       pushSegment(ctx, {
         type: 'revision',
@@ -185,7 +203,7 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
         start,
         end,
         durationMs: duration,
-        metadata: { deleted: domData.length || 1 },
+        metadata: { deleted },
       });
     } else if (event.type === 'paste') {
       const domText = typeof domData === 'string' ? domData : '';
@@ -259,6 +277,7 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
     processProductTimeline.push(point);
 
     ctx.lastTimestamp = end;
+    previousDocSize = event.meta.docSize;
 
     const nextEvent = analyzableEvents[index + 1];
     const rawGap = nextEvent ? Math.max(nextEvent.timestamp - event.timestamp, MIN_EVENT_DURATION) : MIN_EVENT_DURATION;

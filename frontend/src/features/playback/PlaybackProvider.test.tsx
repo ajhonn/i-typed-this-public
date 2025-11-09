@@ -47,6 +47,53 @@ const CurrentTimeProbe = () => {
   return <div data-testid="current-time-probe">{currentTime}</div>;
 };
 
+const TransactionOnlySession = () => {
+  const { appendEvent, setEditorHTML } = useSession();
+
+  useEffect(() => {
+    setEditorHTML('<p>Draft</p>');
+    appendEvent({
+      id: 'txn-1',
+      type: 'text-input',
+      source: 'transaction',
+      timestamp: 0,
+      meta: {
+        docSize: 5,
+        stepTypes: ['replace'],
+        selection: { from: 5, to: 5 },
+        docChanged: true,
+        html: '<p>Draft</p>',
+      },
+    });
+    appendEvent({
+      id: 'txn-2',
+      type: 'delete',
+      source: 'transaction',
+      timestamp: 2000,
+      meta: {
+        docSize: 0,
+        stepTypes: ['replace'],
+        selection: { from: 0, to: 0 },
+        docChanged: true,
+        html: '<p></p>',
+      },
+    });
+  }, [appendEvent, setEditorHTML]);
+
+  return null;
+};
+
+const TimelineProbe = () => {
+  const { playbackEvents } = usePlaybackController();
+  return (
+    <ul data-testid="timeline-types">
+      {playbackEvents.map((event) => (
+        <li key={event.id}>{event.eventType}</li>
+      ))}
+    </ul>
+  );
+};
+
 describe('PlaybackProvider', () => {
   it('seeks to provided timestamp on mount', async () => {
     render(
@@ -64,5 +111,22 @@ describe('PlaybackProvider', () => {
       expect(screen.getByTestId('current-time-probe').textContent).not.toBe('0');
     });
     expect(screen.getByTestId('current-time-probe')).toHaveTextContent('800');
+  });
+
+  it('includes transaction delete events when no DOM counterpart exists', async () => {
+    render(
+      <MemoryRouter>
+        <SessionProvider>
+          <TransactionOnlySession />
+          <PlaybackProvider>
+            <TimelineProbe />
+          </PlaybackProvider>
+        </SessionProvider>
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('timeline-types').textContent).toContain('delete');
+    });
   });
 });

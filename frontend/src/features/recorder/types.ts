@@ -37,5 +37,6 @@ export type RecorderEvent = {
       ledgerAgeMs?: number;
     };
     clipboard?: ClipboardMeta;
+    correlatedDomEventId?: string;
   };
 };

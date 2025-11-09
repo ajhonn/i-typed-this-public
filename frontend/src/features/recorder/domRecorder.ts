@@ -12,7 +12,7 @@ const DOM_EVENT_TYPES = new Set([
   'insertFromPaste',
 ]);
 
-export const useDomRecorder = (editor: Editor | null) => {
+export const useDomRecorder = (editor: Editor | null, onDomEventCaptured?: (event: RecorderEvent) => void) => {
   const { appendEvent } = useSession();
   const lastTimestampRef = useRef<number | null>(null);
 
@@ -62,6 +62,7 @@ export const useDomRecorder = (editor: Editor | null) => {
       }
 
       appendEvent(domEvent);
+      onDomEventCaptured?.(domEvent);
     };
 
     const handleClipboard = (action: 'copy' | 'cut') => () => {
@@ -129,5 +130,5 @@ export const useDomRecorder = (editor: Editor | null) => {
       dom.removeEventListener('copy', handleCopy);
       dom.removeEventListener('cut', handleCut);
     };
-  }, [editor, appendEvent]);
+  }, [editor, appendEvent, onDomEventCaptured]);
 };
