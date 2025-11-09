@@ -76,6 +76,11 @@ const PauseHistogram = () => {
           </div>
         ) : null}
       </div>
+      <div className="mt-4 rounded-2xl border border-dashed border-slate-200 bg-emerald-50/70 p-3 text-xs text-slate-600">
+        <p className="font-semibold text-slate-900">Thresholds</p>
+        <p>Healthy cadence: ≥1 macro pause (≥2 s) before the next burst keeps the pause score above ~0.55.</p>
+        <p>Risk pattern: only micro pauses (&lt;200 ms) or avg macro pause &lt;2 s looks like uninterrupted transcription.</p>
+      </div>
       {totalPauses ? (
         <>
           <div className="mt-6 h-72 w-full" role="img" aria-label="Histogram of pause durations">

@@ -19,6 +19,24 @@ export type BurstStat = {
   eventCount: number;
 };
 
+export type RevisionSummary = {
+  revisionRate: number;
+  textInputs: number;
+  deletions: number;
+  producedChars: number;
+  deletedChars: number;
+};
+
+export type BurstSummary = {
+  totalBursts: number;
+  averageEventsPerBurst: number;
+  averageCharsPerBurst: number;
+  averageDurationMs: number;
+  variance: number;
+  longestBurstDurationMs: number;
+  longestBurstChars: number;
+};
+
 export type SummaryMetric = {
   key: string;
   label: string;
@@ -82,4 +100,6 @@ export type SessionAnalysis = {
   verdictReasoning: string[];
   pastes: PasteInsight[];
   processProductTimeline: ProcessProductPoint[];
+  revisionSummary: RevisionSummary;
+  burstSummary: BurstSummary;
 };

@@ -4,6 +4,8 @@ import PauseHistogram from './PauseHistogram';
 import SessionSignalsRadar from './SessionSignalsRadar';
 import PasteLedgerCard from './PasteLedgerCard';
 import ProcessProductChart from './ProcessProductChart';
+import RevisionActivityCard from './RevisionActivityCard';
+import BurstVarianceCard from './BurstVarianceCard';
 
 const AnalysisRoute = () => {
   return (
@@ -28,6 +30,8 @@ const AnalysisRoute = () => {
         </div>
         <SessionSignalsRadar />
         <SessionAnalysisPanel showRadar={false} />
+        <RevisionActivityCard />
+        <BurstVarianceCard />
         <ProcessProductChart />
         <PasteLedgerCard />
         <PauseHistogram />
