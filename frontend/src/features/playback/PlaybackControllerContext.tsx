@@ -233,9 +233,16 @@ export const PlaybackProvider = ({ children, seekTimestamp }: PlaybackProviderPr
   }, [totalDuration]);
 
   useEffect(() => {
-    setCurrentTimeState(0);
+    if (!playbackEvents.length) {
+      setCurrentTimeState(0);
+      setIsPlaying(false);
+      return;
+    }
     setIsPlaying(false);
-  }, [playbackEvents.length]);
+    if (seekTimestamp == null || Number.isNaN(seekTimestamp)) {
+      setCurrentTimeState(totalDuration);
+    }
+  }, [playbackEvents.length, totalDuration, seekTimestamp]);
 
   useEffect(() => {
     if (seekTimestamp == null || Number.isNaN(seekTimestamp) || !playbackEvents.length) {
@@ -273,10 +280,22 @@ export const PlaybackProvider = ({ children, seekTimestamp }: PlaybackProviderPr
 
   const canPlay = playbackEvents.length > 1;
 
+  const restartPlayback = useCallback(() => {
+    setCurrentTimeState(0);
+    setHighlightAlert(false);
+    setAlertEventId(null);
+  }, []);
+
   const togglePlay = useCallback(() => {
     if (!canPlay) return;
-    setIsPlaying((prev) => !prev);
-  }, [canPlay]);
+    setIsPlaying((prev) => {
+      const next = !prev;
+      if (!prev && next && currentTime >= totalDuration) {
+        restartPlayback();
+      }
+      return next;
+    });
+  }, [canPlay, currentTime, totalDuration, restartPlayback]);
 
   const setPlaying = useCallback((playing: boolean) => {
     setIsPlaying(playing);
@@ -284,10 +303,8 @@ export const PlaybackProvider = ({ children, seekTimestamp }: PlaybackProviderPr
 
   const reset = useCallback(() => {
     setIsPlaying(false);
-    setCurrentTimeState(0);
-    setHighlightAlert(false);
-    setAlertEventId(null);
-  }, []);
+    restartPlayback();
+  }, [restartPlayback]);
 
   const currentSnapshot = useMemo(() => {
     if (!playbackEvents.length) {
