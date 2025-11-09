@@ -1,10 +1,15 @@
+import { useSearchParams } from 'react-router';
 import ShellLayout from '@features/shell/ShellLayout';
 import PlaybackPlayer from './PlaybackPlayer';
 import { PlaybackProvider } from './PlaybackControllerContext';
 
 const PlaybackRoute = () => {
+  const [searchParams] = useSearchParams();
+  const timestampParam = searchParams.get('t');
+  const seekTimestamp = timestampParam ? Number(timestampParam) : undefined;
+
   return (
-    <PlaybackProvider>
+    <PlaybackProvider seekTimestamp={Number.isFinite(seekTimestamp) ? seekTimestamp : undefined}>
       <ShellLayout
         activeTab="playback"
         title="Inspect authentic sessions"

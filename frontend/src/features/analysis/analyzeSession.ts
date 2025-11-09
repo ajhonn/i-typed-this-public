@@ -162,8 +162,9 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
         metadata: { deleted: domData.length || 1 },
       });
     } else if (event.type === 'paste') {
-      const payloadLength = pastePayload?.length ?? domData.length ?? 0;
-      const payloadPreview = pastePayload?.preview ?? domData ?? '';
+      const domText = typeof domData === 'string' ? domData : '';
+      const payloadText = (pastePayload?.text ?? domText ?? pastePayload?.preview ?? '') || '';
+      const payloadLength = pastePayload?.length ?? (typeof payloadText === 'string' ? payloadText.length : domText.length) ?? 0;
       ctx.pasteCount += 1;
       ctx.producedChars += payloadLength;
       finalizeBurst(ctx);
@@ -176,11 +177,7 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
       if (suspicious) {
         ctx.suspiciousPasteCount += 1;
       }
-      const classification: PasteInsight['classification'] = ledgerMatch
-        ? 'internal-copy'
-        : suspicious
-          ? 'unmatched'
-          : 'likely-internal';
+      const classification: PasteInsight['classification'] = ledgerMatch ? 'internal-copy' : 'unmatched';
       const label = ledgerMatch ? 'Internal paste' : suspicious ? 'Unmatched paste' : 'Paste';
       const ledgerInfo = ledgerMatch
         ? {
@@ -192,7 +189,7 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
         id: event.id,
         timestamp: event.timestamp,
         label,
-        payloadPreview: payloadPreview.slice(0, 160).replace(/\s+/g, ' '),
+        payloadText,
         payloadLength,
         classification,
         idleBeforeMs: deltaSinceLastEvent,

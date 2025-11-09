@@ -53,9 +53,9 @@ export type PasteInsight = {
   id: string;
   timestamp: number;
   label: string;
-  payloadPreview: string;
+  payloadText: string;
   payloadLength: number;
-  classification: 'internal-copy' | 'likely-internal' | 'unmatched';
+  classification: 'internal-copy' | 'unmatched';
   idleBeforeMs: number;
   ledgerMatch?: {
     copyEventId?: string;

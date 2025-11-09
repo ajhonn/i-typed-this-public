@@ -3,6 +3,7 @@ import { Plugin } from '@tiptap/pm/state';
 import { matchClipboardText } from '@features/recorder/clipboardLedger';
 
 export type PastePayload = {
+  text: string;
   length: number;
   preview: string;
   source: 'ledger' | 'external';
@@ -34,18 +35,20 @@ export const PasteCaptureExtension = Extension.create({
       new Plugin({
         props: {
           handlePaste: (_view, event) => {
-            const text = (event.clipboardData?.getData('text/plain') ?? '').replace(/\s+/g, ' ').trim();
+            const rawText = event.clipboardData?.getData('text/plain') ?? '';
+            const normalized = rawText.replace(/\s+/g, ' ').trim();
             const now = Date.now();
-            const ledgerMatch = matchClipboardText(text);
+            const ledgerMatch = matchClipboardText(rawText);
             const payload: PastePayload = {
-              length: text.length,
-              preview: text.slice(0, 200),
+              text: rawText,
+              length: rawText.length,
+              preview: rawText.slice(0, 200),
               source: ledgerMatch ? 'ledger' : 'external',
               matchedCopyId: ledgerMatch?.id,
               ledgerAgeMs: ledgerMatch ? now - ledgerMatch.timestamp : undefined,
             };
-            if (!ledgerMatch && text) {
-              pendingUnmatchedAlert = { text };
+            if (!ledgerMatch && normalized) {
+              pendingUnmatchedAlert = { text: rawText };
             }
             setPendingPastePayload(payload);
             if (import.meta.env.DEV) {

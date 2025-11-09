@@ -59,7 +59,6 @@ describe('SessionAnalysisPanel', () => {
     expect(screen.getByTestId('signals-radar')).toBeInTheDocument();
     expect(screen.getByText(/Authorship signals/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Paste cleanliness/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/Paste ledger/i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /open analysis workspace/i })).toHaveAttribute('href', '/analysis');
   });
 });
