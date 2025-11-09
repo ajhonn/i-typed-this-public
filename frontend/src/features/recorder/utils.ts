@@ -1,11 +1,16 @@
 import type { Transaction } from '@tiptap/pm/state';
 import type { RecorderEvent, RecorderEventType } from './types';
 
-const createEventId = () => {
+export const createRecorderEventId = () => {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 };
 
 const detectEventType = (transaction: Transaction): RecorderEventType => {
+  const hasMetaAccessor = typeof transaction.getMeta === 'function';
+  if (hasMetaAccessor && transaction.getMeta('pastePayload')) {
+    return 'paste';
+  }
+
   if (!transaction.docChanged) {
     return transaction.selectionSet ? 'selection-change' : 'transaction';
   }
@@ -31,7 +36,7 @@ export const createRecorderEvent = (
   durationMs?: number
 ): RecorderEvent => {
   return {
-    id: createEventId(),
+    id: createRecorderEventId(),
     type: detectEventType(transaction),
     timestamp: Date.now(),
     source: 'transaction',

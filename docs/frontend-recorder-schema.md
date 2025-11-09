@@ -22,6 +22,10 @@ All events record the session `versionId` so playback and analysis can resolve d
   - `contentHash` (e.g., SHA-256 or rolling hash digest)
   - `textLength`
   - `originalRange` and `versionId`
+- Implementation notes (current recorder state):
+  - Uses a lightweight 32-bit FNV-1a hash plus the payload length to fingerprint clipboard text quickly on every copy, cut, and paste.
+  - Ledger capacity is trimmed to the 50 most recent entries and pruned after 10 minutes to bound memory while covering typical drafting sessions.
+  - Copy/cut DOM listeners emit dedicated recorder events so analysts can tell when text is staged internally even if it is never pasted.
 - On every `paste`:
   1. Compute the same `contentHash` for the pasted payload.
   2. Look up matching ledger entries within a configurable window (e.g., last 10 minutes). If a hash matches and the document version is compatible, classify as `internal`.

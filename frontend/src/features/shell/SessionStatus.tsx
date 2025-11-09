@@ -25,7 +25,6 @@ const SessionStatus = ({ state }: SessionStatusProps) => {
   const classes = [
     'session-status relative inline-flex items-center gap-2 rounded-full border border-slate-200 text-xs font-semibold uppercase tracking-wide text-slate-600',
     state === 'recording' ? 'session-status--recording' : '',
-    state === 'reviewing' ? 'session-status--reviewing' : '',
   ]
     .filter(Boolean)
     .join(' ');

@@ -3,11 +3,13 @@ import type { Editor } from '@tiptap/react';
 import type { Transaction } from '@tiptap/pm/state';
 import { useSession } from '@features/session/SessionProvider';
 import { createRecorderEvent } from './utils';
+import { getPendingPastePayload, setPendingPastePayload } from '@features/playback/extensions/PasteCaptureExtension';
 import { useDomRecorder } from './domRecorder';
 
 export const useRecorder = (editor: Editor | null) => {
   const { appendEvent, setRecorderState } = useSession();
   const lastTimestampRef = useRef<number | null>(null);
+  const pendingPasteRef = useRef<RecorderEvent['meta']['pastePayload'] | null>(null);
 
   useDomRecorder(editor);
 
@@ -39,6 +41,18 @@ export const useRecorder = (editor: Editor | null) => {
 
       const htmlSnapshot = editor.getHTML();
       const event = createRecorderEvent(transaction, htmlSnapshot, durationMs);
+      const freshPayload = getPendingPastePayload();
+      if (freshPayload) {
+        pendingPasteRef.current = freshPayload;
+      }
+
+      if (pendingPasteRef.current && transaction.docChanged) {
+        event.type = 'paste';
+        event.meta.pastePayload = pendingPasteRef.current;
+        setPendingPastePayload(null);
+        pendingPasteRef.current = null;
+      }
+
       appendEvent(event);
     };
 

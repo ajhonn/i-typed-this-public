@@ -85,9 +85,17 @@ describe('PlaybackToolbar', () => {
       </SessionProvider>
     );
 
-    expect(await screen.findByRole('button', { name: /Play/i })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: /^Play$/i })).toBeInTheDocument();
     expect(screen.getByLabelText(/Playback speed/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Download session JSON/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Toggle playback settings/i })).toBeInTheDocument();
+    const timeline = await screen.findByTestId('playback-timeline');
+    expect(timeline).toBeInTheDocument();
+    expect(screen.getByLabelText(/Timeline legend/i)).toHaveTextContent(/Typing/i);
+    expect(screen.getByLabelText(/Timeline overview/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'All' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Pan timeline left')).toBeInTheDocument();
+    expect(screen.getByLabelText('Pan timeline right')).toBeInTheDocument();
   });
 
   it('highlights skipped idle gaps when present', async () => {
@@ -100,6 +108,6 @@ describe('PlaybackToolbar', () => {
       </SessionProvider>
     );
 
-    expect(await screen.findByText(/Skipped 6.4s idle/i)).toBeInTheDocument();
+    expect(await screen.findAllByTitle(/Idle gap boundary/i)).toHaveLength(1);
   });
 });
