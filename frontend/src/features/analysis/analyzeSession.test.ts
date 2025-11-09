@@ -34,6 +34,10 @@ describe('analyzeSession', () => {
         meta: { html: '<p>He</p>', domInput: { inputType: 'insertText', data: 'e' }, docSize: 2, selection: { from: 2, to: 2 } },
       }),
       mockEvent({
+        timestamp: 700,
+        meta: { html: '<p>Hel</p>', domInput: { inputType: 'insertText', data: 'l' }, docSize: 3, selection: { from: 3, to: 3 } },
+      }),
+      mockEvent({
         type: 'delete',
         timestamp: 2500,
         meta: { html: '<p>H</p>', domInput: { inputType: 'deleteContentBackward', data: 'e' }, docSize: 1, selection: { from: 1, to: 1 } },
@@ -52,6 +56,10 @@ describe('analyzeSession', () => {
     expect(result.segments.some((segment) => segment.type === 'pause')).toBe(true);
     expect(result.segments.some((segment) => segment.type === 'paste')).toBe(true);
     expect(result.pastes.length).toBeGreaterThan(0);
+    const macroBucket = result.pauseHistogram.find((bin) => bin.key === 'gt-2000');
+    expect(macroBucket?.count).toBe(1);
+    const midBucket = result.pauseHistogram.find((bin) => bin.key === '200-1000');
+    expect(midBucket?.count).toBe(1);
   });
 
   it('classifies ledger-matched pastes as internal copies', () => {
@@ -78,5 +86,6 @@ describe('analyzeSession', () => {
     expect(result.pastes[0]?.classification).toBe('internal-copy');
     expect(result.pastes[0]?.ledgerMatch?.copyEventId).toBe('copy-1');
     expect(result.signals.pasteAnomalyCount).toBe(0);
+    expect(result.pauseHistogram.every((bin) => typeof bin.count === 'number')).toBe(true);
   });
 });

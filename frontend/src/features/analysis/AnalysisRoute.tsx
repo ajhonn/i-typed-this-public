@@ -1,5 +1,6 @@
 import ShellLayout from '@features/shell/ShellLayout';
 import SessionAnalysisPanel from './SessionAnalysisPanel';
+import PauseHistogram from './PauseHistogram';
 
 const AnalysisRoute = () => {
   return (
@@ -24,6 +25,7 @@ const AnalysisRoute = () => {
           </ul>
         </div>
         <SessionAnalysisPanel />
+        <PauseHistogram />
       </div>
     </ShellLayout>
   );
