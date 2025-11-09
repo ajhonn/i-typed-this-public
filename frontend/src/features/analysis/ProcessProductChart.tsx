@@ -72,6 +72,12 @@ const ProcessProductChart = () => {
           </div>
         ) : null}
       </div>
+      <div className="mt-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+        <p className="font-semibold text-slate-900">Thresholds</p>
+        <p>Healthy drafting: ratio ≥1.05 shows extra typing beyond what shipped.</p>
+        <p>Strong evidence: ratio ≥1.25 usually means iterative edits.</p>
+        <p>Risk: ratio ≤1.05 with 10+ text inputs looks like direct transcription.</p>
+      </div>
 
       {hasData ? (
         <div className="mt-6 h-72 w-full" role="img" aria-label="Process vs product timeline">

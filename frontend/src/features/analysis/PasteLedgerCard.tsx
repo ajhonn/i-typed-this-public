@@ -24,6 +24,11 @@ const PasteLedgerCard = () => {
           </span>
         ) : null}
       </div>
+      <div className="mt-4 rounded-2xl border border-dashed border-orange-200 bg-orange-50/40 p-3 text-xs text-orange-700">
+        <p className="font-semibold text-orange-900">Thresholds</p>
+        <p>We flag pastes when they skip our ledger match and either exceed 64 characters or arrive after ≥5 s of idle time.</p>
+        <p>Medium alerts trigger for 24+ characters with ≥3 s idle gaps—those often pair with external drafts.</p>
+      </div>
       {unmatchedPastes.length ? (
         <div className="mt-4 max-h-96 space-y-4 overflow-y-auto pr-1 text-orange-900" role="list">
           {unmatchedPastes.map((paste) => {

@@ -13,6 +13,7 @@ const baseAnalysis: SessionAnalysis = {
   bursts: [],
   metrics: [],
   pauseHistogram: [],
+  processProductTimeline: [],
   signals: {
     pauseScore: 0,
     revisionScore: 0,
@@ -23,6 +24,22 @@ const baseAnalysis: SessionAnalysis = {
   verdict: 'likely-authentic',
   verdictReasoning: [],
   pastes: [],
+  revisionSummary: {
+    revisionRate: 0,
+    textInputs: 0,
+    deletions: 0,
+    producedChars: 0,
+    deletedChars: 0,
+  },
+  burstSummary: {
+    totalBursts: 0,
+    averageEventsPerBurst: 0,
+    averageCharsPerBurst: 0,
+    averageDurationMs: 0,
+    variance: 0,
+    longestBurstDurationMs: 0,
+    longestBurstChars: 0,
+  },
 };
 
 const mockUseSessionAnalysis = useSessionAnalysis as unknown as vi.Mock;

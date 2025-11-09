@@ -408,6 +408,8 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
 
   const metricDetailTargets: Record<string, string | undefined> = {
     pauseScore: 'analysis-pause-card',
+    revisionScore: 'analysis-revision-card',
+    burstVariance: 'analysis-burst-card',
     pasteRisk: 'analysis-paste-ledger-card',
     productProcess: 'analysis-process-card',
   };
@@ -474,6 +476,36 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
     count: ctx.pauseBuckets[bucket.key] ?? 0,
   }));
 
+  const revisionSummary = {
+    revisionRate: revisionScore,
+    textInputs: ctx.textInputCount,
+    deletions: ctx.deleteCount,
+    producedChars,
+    deletedChars: ctx.deletedChars,
+  };
+
+  const burstAggregates = ctx.bursts.reduce(
+    (acc, burst) => {
+      acc.duration += burst.durationMs;
+      acc.chars += burst.charCount;
+      acc.events += burst.eventCount;
+      acc.longestDuration = Math.max(acc.longestDuration, burst.durationMs);
+      acc.longestChars = Math.max(acc.longestChars, burst.charCount);
+      return acc;
+    },
+    { duration: 0, chars: 0, events: 0, longestDuration: 0, longestChars: 0 }
+  );
+  const totalBursts = ctx.bursts.length;
+  const burstSummary = {
+    totalBursts,
+    averageEventsPerBurst: totalBursts ? burstAggregates.events / totalBursts : 0,
+    averageCharsPerBurst: totalBursts ? burstAggregates.chars / totalBursts : 0,
+    averageDurationMs: totalBursts ? burstAggregates.duration / totalBursts : 0,
+    variance: burstVariance,
+    longestBurstDurationMs: burstAggregates.longestDuration,
+    longestBurstChars: burstAggregates.longestChars,
+  };
+
   return {
     segments: ctx.segments,
     bursts: ctx.bursts,
@@ -484,5 +516,7 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
     verdictReasoning: reasoning,
     pastes: pasteLog,
     processProductTimeline,
+    revisionSummary,
+    burstSummary,
   };
 };

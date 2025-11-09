@@ -63,6 +63,16 @@
 ## 6. Next Documentation Tasks
 - Draft UI wireframes or references in `docs/frontend-ui-notes.md` for layout, timeline, and accessibility considerations.
 
+## 6.1 Future Analysis Enhancements (Backlog)
+Capture these ideas now so later milestones can prioritize deeper authorship signals:
+- **Word/paragraph-level diffing**: treat revisions as semantic units rather than single deletions; compute “tokens touched”, paragraph churn, and structural edits to discourage cosmetic changes.
+- **Revision taxonomy**: classify edits (punctuation tweaks vs. word swaps vs. sentence rewrites) and track mix ratios—authentic drafting tends to touch multiple categories.
+- **Pause–revision coupling**: highlight macro pauses that immediately precede multi-word edits; surface a “pause → edit” frequency metric.
+- **Vocabulary churn & LM cues**: measure unique word substitutions, synonym introduction, or verb/qualifier changes to infer ideation vs. rote typing; optionally pair with lightweight language-model heuristics.
+- **Paragraph lifecycle metrics**: detect when paragraphs are added, split, or removed wholesale, plus time spent editing each.
+- **Rolling diff snapshots**: compute edit-distance windows to quantify insert/delete/substitute balance; low deletion share across long sessions signals transcription.
+- **Paste provenance follow-up**: once unmatched pastes land, track whether subsequent deletions sculpt the pasted text—lack of edits after a paste is a strong risk signal.
+
 ## 7. Testing Strategy (Overview)
 - **Unit tests**:
   - Recorder services (event normalization, clipboard ledger hashing).
