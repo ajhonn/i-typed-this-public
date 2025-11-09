@@ -5,6 +5,15 @@ const MICRO_PAUSE_MS = 200;
 const MACRO_PAUSE_MS = 2000;
 const MIN_EVENT_DURATION = 16;
 
+const PAUSE_BUCKETS = [
+  { key: 'lt-200', label: '<200 ms', min: 0, max: MICRO_PAUSE_MS },
+  { key: '200-1000', label: '200 ms - 1 s', min: MICRO_PAUSE_MS, max: 1000 },
+  { key: '1000-2000', label: '1 s - 2 s', min: 1000, max: MACRO_PAUSE_MS },
+  { key: 'gt-2000', label: '>2 s', min: MACRO_PAUSE_MS, max: Number.POSITIVE_INFINITY },
+] as const;
+
+type PauseBucketKey = (typeof PAUSE_BUCKETS)[number]['key'];
+
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
 const textFromHTML = (html: string) => {
@@ -36,6 +45,7 @@ type AnalyzerContext = {
   macroPauseCount: number;
   macroPauseTotal: number;
   lastTimestamp: number | null;
+  pauseBuckets: Record<PauseBucketKey, number>;
 };
 
 const initContext = (): AnalyzerContext => ({
@@ -51,6 +61,13 @@ const initContext = (): AnalyzerContext => ({
   macroPauseCount: 0,
   macroPauseTotal: 0,
   lastTimestamp: null,
+  pauseBuckets: PAUSE_BUCKETS.reduce(
+    (acc, bucket) => {
+      acc[bucket.key] = 0;
+      return acc;
+    },
+    {} as Record<PauseBucketKey, number>
+  ),
 });
 
 const finalizeBurst = (ctx: AnalyzerContext) => {
@@ -84,6 +101,10 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
       const delta = start - ctx.lastTimestamp;
       if (delta >= MICRO_PAUSE_MS) {
         const severity = delta >= MACRO_PAUSE_MS ? 'macro' : 'micro';
+        const bucket = PAUSE_BUCKETS.find((candidate) => delta >= candidate.min && delta < candidate.max);
+        if (bucket) {
+          ctx.pauseBuckets[bucket.key] += 1;
+        }
         pushSegment(ctx, {
           type: 'pause',
           label: severity === 'macro' ? 'Macro pause' : 'Pause',
@@ -316,10 +337,21 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
     },
   ];
 
+  const pauseHistogram = PAUSE_BUCKETS.map((bucket) => ({
+    key: bucket.key,
+    label: bucket.label,
+    rangeMs: {
+      min: bucket.min,
+      ...(Number.isFinite(bucket.max) ? { max: bucket.max } : {}),
+    },
+    count: ctx.pauseBuckets[bucket.key] ?? 0,
+  }));
+
   return {
     segments: ctx.segments,
     bursts: ctx.bursts,
     metrics,
+    pauseHistogram,
     signals,
     verdict,
     verdictReasoning: reasoning,

@@ -39,6 +39,16 @@ export type AnalysisSignals = {
 
 export type AnalysisVerdict = 'likely-authentic' | 'needs-review' | 'high-risk';
 
+export type PauseHistogramBin = {
+  key: string;
+  label: string;
+  rangeMs: {
+    min: number;
+    max?: number;
+  };
+  count: number;
+};
+
 export type PasteInsight = {
   id: string;
   timestamp: number;
@@ -57,6 +67,7 @@ export type SessionAnalysis = {
   segments: TimelineSegment[];
   bursts: BurstStat[];
   metrics: SummaryMetric[];
+  pauseHistogram: PauseHistogramBin[];
   signals: AnalysisSignals;
   verdict: AnalysisVerdict;
   verdictReasoning: string[];
