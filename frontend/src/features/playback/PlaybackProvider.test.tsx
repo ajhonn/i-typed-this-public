@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { useEffect } from 'react';
 import { SessionProvider, useSession } from '@features/session/SessionProvider';
@@ -94,6 +94,32 @@ const TimelineProbe = () => {
   );
 };
 
+const DefaultFrameProbe = () => {
+  const { currentTime, totalDuration } = usePlaybackController();
+  return (
+    <div>
+      <span data-testid="default-current">{currentTime}</span>
+      <span data-testid="default-duration">{totalDuration}</span>
+    </div>
+  );
+};
+
+const EndPlayHarness = () => {
+  const { currentTime, totalDuration, setCurrentTime, togglePlay, isPlaying } = usePlaybackController();
+  useEffect(() => {
+    setCurrentTime(totalDuration);
+  }, [setCurrentTime, totalDuration]);
+  return (
+    <div>
+      <div data-testid="harness-time">{currentTime}</div>
+      <div data-testid="harness-playing">{isPlaying ? 'playing' : 'paused'}</div>
+      <button data-testid="harness-play-btn" onClick={togglePlay}>
+        Play
+      </button>
+    </div>
+  );
+};
+
 describe('PlaybackProvider', () => {
   it('seeks to provided timestamp on mount', async () => {
     render(
@@ -127,6 +153,49 @@ describe('PlaybackProvider', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('timeline-types').textContent).toContain('delete');
+    });
+  });
+
+  it('shows the final frame by default when no seek timestamp is provided', async () => {
+    render(
+      <MemoryRouter>
+        <SessionProvider>
+          <SeedSession />
+          <PlaybackProvider>
+            <DefaultFrameProbe />
+          </PlaybackProvider>
+        </SessionProvider>
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      const duration = Number(screen.getByTestId('default-duration').textContent);
+      expect(duration).toBeGreaterThan(0);
+      expect(Number(screen.getByTestId('default-current').textContent)).toBe(duration);
+    });
+  });
+
+  it('restarts playback when play is pressed at the end of the timeline', async () => {
+    render(
+      <MemoryRouter>
+        <SessionProvider>
+          <SeedSession />
+          <PlaybackProvider>
+            <EndPlayHarness />
+          </PlaybackProvider>
+        </SessionProvider>
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(Number(screen.getByTestId('harness-time').textContent)).toBeGreaterThan(0);
+    });
+
+    fireEvent.click(screen.getByTestId('harness-play-btn'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('harness-playing')).toHaveTextContent('playing');
+      expect(Number(screen.getByTestId('harness-time').textContent)).toBe(0);
     });
   });
 });
