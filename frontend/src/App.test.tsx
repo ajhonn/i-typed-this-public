@@ -60,7 +60,7 @@ describe('App routing', () => {
     async () => {
       const user = userEvent.setup();
       render(<App />);
-      await user.click(screen.getByRole('link', { name: /analysis/i }));
+      await user.click(screen.getByRole('link', { name: /^analysis$/i }));
       expect(await screen.findByTestId('session-analysis')).toBeInTheDocument();
     },
     10000

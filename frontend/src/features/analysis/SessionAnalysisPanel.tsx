@@ -1,4 +1,7 @@
+import { Link } from 'react-router';
+import { ROUTES } from '@routes/paths';
 import { useSessionAnalysis } from './useSessionAnalysis';
+import SessionSignalsRadar from './SessionSignalsRadar';
 
 const verdictCopy: Record<string, { label: string; tone: string }> = {
   'likely-authentic': { label: 'Likely authentic', tone: 'text-emerald-600 bg-emerald-50' },
@@ -20,7 +23,11 @@ const metricDescriptions: Record<string, string> = {
   productProcess: 'Compares typed content vs. final text—lower ratios mean iterative drafting.',
 };
 
-const SessionAnalysisPanel = () => {
+type SessionAnalysisPanelProps = {
+  showRadar?: boolean;
+};
+
+const SessionAnalysisPanel = ({ showRadar = true }: SessionAnalysisPanelProps) => {
   const analysis = useSessionAnalysis();
   const verdictStyles = verdictCopy[analysis.verdict];
   const guidance = [
@@ -44,6 +51,20 @@ const SessionAnalysisPanel = () => {
       <p className="text-sm text-slate-600">
         Reviewers can scan these bars first: green means the session behaves like live typing, while amber/red marks areas worth replaying (e.g., pastes without accompanying edits).
       </p>
+
+      {showRadar ? (
+        <>
+          <SessionSignalsRadar />
+          <div className="flex justify-end">
+            <Link
+              to={ROUTES.analysis}
+              className="inline-flex items-center rounded-full border border-slate-300 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-700 transition hover:bg-slate-900 hover:text-white"
+            >
+              Open analysis workspace
+            </Link>
+          </div>
+        </>
+      ) : null}
 
       <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(200px,1fr))]">
         {analysis.metrics.map((metric) => (
