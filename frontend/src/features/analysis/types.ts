@@ -27,6 +27,8 @@ export type SummaryMetric = {
   score: number;
   trend?: 'positive' | 'negative';
   helperText?: string;
+  alert?: boolean;
+  detailTarget?: string;
 };
 
 export type AnalysisSignals = {
@@ -63,6 +65,13 @@ export type PasteInsight = {
   };
 };
 
+export type ProcessProductPoint = {
+  timestamp: number;
+  elapsedMs: number;
+  producedChars: number;
+  documentChars: number;
+};
+
 export type SessionAnalysis = {
   segments: TimelineSegment[];
   bursts: BurstStat[];
@@ -72,4 +81,5 @@ export type SessionAnalysis = {
   verdict: AnalysisVerdict;
   verdictReasoning: string[];
   pastes: PasteInsight[];
+  processProductTimeline: ProcessProductPoint[];
 };

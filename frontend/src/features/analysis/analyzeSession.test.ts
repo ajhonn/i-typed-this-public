@@ -44,8 +44,19 @@ describe('analyzeSession', () => {
       }),
       mockEvent({
         type: 'paste',
+        source: 'transaction',
         timestamp: 8000,
-        meta: { html: '<p>Hello world</p>', domInput: { inputType: 'insertFromPaste', data: ' world' }, docSize: 11, selection: { from: 11, to: 11 } },
+        meta: {
+          html: '<p>Hello world</p>',
+          docSize: 11,
+          selection: { from: 11, to: 11 },
+          pastePayload: {
+            text: ' world',
+            length: 6,
+            preview: ' world',
+            source: 'external',
+          },
+        },
       }),
     ];
 
@@ -56,6 +67,9 @@ describe('analyzeSession', () => {
     expect(result.segments.some((segment) => segment.type === 'pause')).toBe(true);
     expect(result.segments.some((segment) => segment.type === 'paste')).toBe(true);
     expect(result.pastes.length).toBeGreaterThan(0);
+    expect(result.processProductTimeline.length).toBeGreaterThan(0);
+    const lastPoint = result.processProductTimeline[result.processProductTimeline.length - 1];
+    expect(lastPoint?.documentChars).toBeGreaterThan(0);
     const macroBucket = result.pauseHistogram.find((bin) => bin.key === 'gt-2000');
     expect(macroBucket?.count).toBe(1);
     const midBucket = result.pauseHistogram.find((bin) => bin.key === '200-1000');
@@ -66,6 +80,7 @@ describe('analyzeSession', () => {
     const events: RecorderEvent[] = [
       mockEvent({
         type: 'paste',
+        source: 'transaction',
         timestamp: 5000,
         meta: {
           docSize: 20,
@@ -98,12 +113,18 @@ describe('analyzeSession', () => {
       }),
       mockEvent({
         type: 'paste',
+        source: 'transaction',
         timestamp: 1000,
         meta: {
           html: '<p>Hi there</p>',
           docSize: 8,
           selection: { from: 8, to: 8 },
-          domInput: { inputType: 'insertFromPaste', data: ' there' },
+          pastePayload: {
+            text: ' there',
+            length: 6,
+            preview: ' there',
+            source: 'external',
+          },
         },
       }),
     ];

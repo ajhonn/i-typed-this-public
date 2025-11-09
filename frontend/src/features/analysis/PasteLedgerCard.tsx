@@ -12,7 +12,7 @@ const PasteLedgerCard = () => {
   }, [analysis.pastes]);
 
   return (
-    <section className="rounded-3xl border border-orange-200 bg-white p-6 shadow-sm" data-testid="paste-ledger-card">
+    <section id="analysis-paste-ledger-card" className="rounded-3xl border border-orange-200 bg-white p-6 shadow-sm" data-testid="paste-ledger-card">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-[0.4em] text-orange-500">Paste ledger</p>

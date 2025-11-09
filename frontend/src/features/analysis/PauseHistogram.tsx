@@ -59,7 +59,7 @@ const PauseHistogram = () => {
   }, [histogram]);
 
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm" data-testid="pause-histogram">
+    <section id="analysis-pause-card" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm" data-testid="pause-histogram">
       <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.4em] text-slate-500">Pause analysis</p>
