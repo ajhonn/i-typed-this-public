@@ -3,6 +3,7 @@ import LearnRoute from '@features/learn/LearnRoute';
 import PlaybackRoute from '@features/playback/PlaybackRoute';
 import WriteRoute from '@features/write/WriteRoute';
 import { ROUTES } from './paths';
+import AnalysisRoute from '@features/analysis/AnalysisRoute';
 
 export const appRoutes = [
   {
@@ -16,6 +17,10 @@ export const appRoutes = [
   {
     path: ROUTES.playback,
     element: <PlaybackRoute />,
+  },
+  {
+    path: ROUTES.analysis,
+    element: <AnalysisRoute />,
   },
   {
     path: ROUTES.learn,
