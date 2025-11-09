@@ -72,6 +72,7 @@ describe('analyzeSession', () => {
           selection: { from: 20, to: 20 },
           html: '<p>Example</p>',
           pastePayload: {
+            text: 'import',
             length: 6,
             preview: 'import',
             source: 'ledger',
@@ -87,5 +88,27 @@ describe('analyzeSession', () => {
     expect(result.pastes[0]?.ledgerMatch?.copyEventId).toBe('copy-1');
     expect(result.signals.pasteAnomalyCount).toBe(0);
     expect(result.pauseHistogram.every((bin) => typeof bin.count === 'number')).toBe(true);
+  });
+
+  it('marks all external pastes as unmatched regardless of size', () => {
+    const events: RecorderEvent[] = [
+      mockEvent({
+        timestamp: 0,
+        meta: { html: '<p>Hi</p>', domInput: { inputType: 'insertText', data: 'Hi' }, docSize: 2, selection: { from: 2, to: 2 } },
+      }),
+      mockEvent({
+        type: 'paste',
+        timestamp: 1000,
+        meta: {
+          html: '<p>Hi there</p>',
+          docSize: 8,
+          selection: { from: 8, to: 8 },
+          domInput: { inputType: 'insertFromPaste', data: ' there' },
+        },
+      }),
+    ];
+
+    const result = analyzeSession(events, '<p>Hi there</p>');
+    expect(result.pastes[0]?.classification).toBe('unmatched');
   });
 });

@@ -2,6 +2,7 @@ import ShellLayout from '@features/shell/ShellLayout';
 import SessionAnalysisPanel from './SessionAnalysisPanel';
 import PauseHistogram from './PauseHistogram';
 import SessionSignalsRadar from './SessionSignalsRadar';
+import PasteLedgerCard from './PasteLedgerCard';
 
 const AnalysisRoute = () => {
   return (
@@ -27,6 +28,7 @@ const AnalysisRoute = () => {
         </div>
         <SessionSignalsRadar />
         <SessionAnalysisPanel showRadar={false} />
+        <PasteLedgerCard />
         <PauseHistogram />
       </div>
     </ShellLayout>

@@ -29,6 +29,7 @@ export type RecorderEvent = {
       data?: string | null;
     };
     pastePayload?: {
+      text: string;
       length: number;
       preview: string;
       source?: 'ledger' | 'external';

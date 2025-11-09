@@ -47,6 +47,7 @@ const IDLE_GAP_THRESHOLD_MS = 4000;
 const COMPRESSED_GAP_DURATION_MS = 600;
 const MAX_DIFF_PREVIEW = 80;
 const PAUSE_PREF_KEY = 'playback.pauseOnUnmatched';
+const SEEK_PREVIEW_MS = 200;
 
 const getPausePreference = () => {
   if (typeof window === 'undefined') {
@@ -186,7 +187,11 @@ const derivePlaybackEvents = (events: RecorderEvent[], editorHTML: string): Play
   return snapshots;
 };
 
-export const PlaybackProvider = ({ children }: PropsWithChildren) => {
+type PlaybackProviderProps = PropsWithChildren<{
+  seekTimestamp?: number | null;
+}>;
+
+export const PlaybackProvider = ({ children, seekTimestamp }: PlaybackProviderProps) => {
   const { session } = useSession();
   const playbackEvents = useMemo(() => derivePlaybackEvents(session.events, session.editorHTML), [
     session.editorHTML,
@@ -228,6 +233,17 @@ export const PlaybackProvider = ({ children }: PropsWithChildren) => {
     setCurrentTimeState(0);
     setIsPlaying(false);
   }, [playbackEvents.length]);
+
+  useEffect(() => {
+    if (seekTimestamp == null || Number.isNaN(seekTimestamp) || !playbackEvents.length) {
+      return;
+    }
+    const targetSnapshot =
+      playbackEvents.find((snapshot) => snapshot.timestamp >= seekTimestamp) ?? playbackEvents[playbackEvents.length - 1];
+    const nudgedTime = clamp(targetSnapshot.elapsedMs + SEEK_PREVIEW_MS, 0, totalDuration);
+    setCurrentTimeState(nudgedTime);
+    setIsPlaying(false);
+  }, [seekTimestamp, playbackEvents, totalDuration]);
 
   useEffect(() => {
     if (!isPlaying) {
