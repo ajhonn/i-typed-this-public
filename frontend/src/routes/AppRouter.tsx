@@ -1,5 +1,5 @@
 import { Navigate, RouterProvider, createBrowserRouter } from 'react-router';
-import LearnRoute from '@features/learn/LearnRoute';
+import AboutRoute from '@features/about/AboutRoute';
 import PlaybackRoute from '@features/playback/PlaybackRoute';
 import WriteRoute from '@features/write/WriteRoute';
 import { ROUTES } from './paths';
@@ -23,8 +23,8 @@ export const appRoutes = [
     element: <AnalysisRoute />,
   },
   {
-    path: ROUTES.learn,
-    element: <LearnRoute />,
+    path: ROUTES.about,
+    element: <AboutRoute />,
   },
 ];
 
