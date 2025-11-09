@@ -123,8 +123,11 @@ const derivePlaybackEvents = (events: RecorderEvent[], editorHTML: string): Play
   }
 
   let chosen = events.filter((event) => {
-    if (event.source === 'dom') return true;
-    if (event.type === 'text-input' || event.type === 'delete') {
+    if (
+      event.source === 'transaction' &&
+      (event.type === 'text-input' || event.type === 'delete') &&
+      event.meta.correlatedDomEventId
+    ) {
       return false;
     }
     return true;
