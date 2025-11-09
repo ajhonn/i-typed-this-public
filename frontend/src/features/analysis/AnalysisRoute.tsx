@@ -1,6 +1,7 @@
 import ShellLayout from '@features/shell/ShellLayout';
 import SessionAnalysisPanel from './SessionAnalysisPanel';
 import PauseHistogram from './PauseHistogram';
+import SessionSignalsRadar from './SessionSignalsRadar';
 
 const AnalysisRoute = () => {
   return (
@@ -24,7 +25,8 @@ const AnalysisRoute = () => {
             <li>Plot bursts + WPM and compare against cohort guardrails.</li>
           </ul>
         </div>
-        <SessionAnalysisPanel />
+        <SessionSignalsRadar />
+        <SessionAnalysisPanel showRadar={false} />
         <PauseHistogram />
       </div>
     </ShellLayout>

@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { useEffect } from 'react';
+import { MemoryRouter } from 'react-router';
 import SessionAnalysisPanel from './SessionAnalysisPanel';
 import { SessionProvider, useSession } from '@features/session/SessionProvider';
 
@@ -44,17 +45,21 @@ const SeedAnalysis = () => {
 describe('SessionAnalysisPanel', () => {
   it('renders analysis verdict and metrics', async () => {
     render(
-      <SessionProvider>
-        <SeedAnalysis />
-        <SessionAnalysisPanel />
-      </SessionProvider>
+      <MemoryRouter>
+        <SessionProvider>
+          <SeedAnalysis />
+          <SessionAnalysisPanel />
+        </SessionProvider>
+      </MemoryRouter>
     );
 
     await waitFor(() => {
       expect(screen.getByTestId('session-analysis')).toBeInTheDocument();
     });
+    expect(screen.getByTestId('signals-radar')).toBeInTheDocument();
     expect(screen.getByText(/Authorship signals/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Paste cleanliness/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/Paste ledger/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /open analysis workspace/i })).toHaveAttribute('href', '/analysis');
   });
 });

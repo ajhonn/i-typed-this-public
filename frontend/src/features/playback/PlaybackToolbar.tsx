@@ -1,17 +1,8 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useId,
-  type PointerEvent,
-  type ReactNode,
-  type SVGProps,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useId, type PointerEvent, type ReactNode, type SVGProps } from 'react';
 import { createPortal } from 'react-dom';
 import { useSession } from '@features/session/SessionProvider';
 import { usePlaybackController, type PlaybackSnapshot } from './PlaybackControllerContext';
+import PlaybackAnalysisDock from './PlaybackAnalysisDock';
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max));
 const DEFAULT_VIEWPORT_MS = 60000;
@@ -723,15 +714,23 @@ const PlaybackToolbar = () => {
   );
 
   const portalTarget = typeof document !== 'undefined' ? document.body : null;
+  const dockStack = (
+    <div className="flex w-full flex-col items-center gap-4">
+      {timelinePanel}
+      {isSettingsOpen ? settingsPanel : null}
+      {transportControls}
+    </div>
+  );
 
   const floatingDock = (
     <div
       data-playback-dock
-      className="fixed bottom-6 left-1/2 z-40 flex w-full max-w-[960px] -translate-x-1/2 flex-col items-center gap-4 px-4"
+      className="fixed bottom-6 left-1/2 z-40 flex w-full -translate-x-1/2 flex-col items-center gap-4 px-4"
     >
-      {timelinePanel}
-      {isSettingsOpen ? settingsPanel : null}
-      {transportControls}
+      <div className="w-full max-w-[1100px]">
+        <PlaybackAnalysisDock />
+      </div>
+      <div className="w-full max-w-[1100px]">{dockStack}</div>
     </div>
   );
 
@@ -739,10 +738,11 @@ const PlaybackToolbar = () => {
     <>
       {portalTarget ? createPortal(floatingDock, portalTarget) : null}
       {!portalTarget ? (
-        <div className="flex w-full flex-col gap-4" aria-label="Playback controls">
-          {timelinePanel}
-          {isSettingsOpen ? settingsPanel : null}
-          {transportControls}
+        <div className="flex w-full flex-col items-center gap-4" aria-label="Playback controls">
+          <div className="w-full max-w-[1100px]">
+            <PlaybackAnalysisDock />
+          </div>
+          <div className="w-full max-w-[1100px]">{dockStack}</div>
         </div>
       ) : null}
     </>

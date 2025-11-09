@@ -1,17 +1,8 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import type { ReactNode } from 'react';
 import PauseHistogram from './PauseHistogram';
 import type { SessionAnalysis } from './types';
 import { useSessionAnalysis } from './useSessionAnalysis';
-
-vi.mock('recharts', async () => {
-  const actual = await vi.importActual<typeof import('recharts')>('recharts');
-  return {
-    ...actual,
-    ResponsiveContainer: ({ children }: { children: ReactNode }) => <div data-testid="responsive-container">{children}</div>,
-  };
-});
 
 vi.mock('./useSessionAnalysis', () => ({
   useSessionAnalysis: vi.fn(),

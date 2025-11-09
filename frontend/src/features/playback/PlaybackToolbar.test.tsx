@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { useEffect } from 'react';
+import { MemoryRouter } from 'react-router';
 import PlaybackToolbar from './PlaybackToolbar';
 import { PlaybackProvider } from './PlaybackControllerContext';
 import { SessionProvider, useSession } from '@features/session/SessionProvider';
@@ -77,12 +78,14 @@ const IdleGapPlayback = () => {
 describe('PlaybackToolbar', () => {
   it('renders playback controls inside the ribbon', async () => {
     render(
-      <SessionProvider>
-        <PlaybackProvider>
-          <SeedPlayback />
-          <PlaybackToolbar />
-        </PlaybackProvider>
-      </SessionProvider>
+      <MemoryRouter>
+        <SessionProvider>
+          <PlaybackProvider>
+            <SeedPlayback />
+            <PlaybackToolbar />
+          </PlaybackProvider>
+        </SessionProvider>
+      </MemoryRouter>
     );
 
     expect(await screen.findByRole('button', { name: /^Play$/i })).toBeInTheDocument();
@@ -100,12 +103,14 @@ describe('PlaybackToolbar', () => {
 
   it('highlights skipped idle gaps when present', async () => {
     render(
-      <SessionProvider>
-        <PlaybackProvider>
-          <IdleGapPlayback />
-          <PlaybackToolbar />
-        </PlaybackProvider>
-      </SessionProvider>
+      <MemoryRouter>
+        <SessionProvider>
+          <PlaybackProvider>
+            <IdleGapPlayback />
+            <PlaybackToolbar />
+          </PlaybackProvider>
+        </SessionProvider>
+      </MemoryRouter>
     );
 
     expect(await screen.findAllByTitle(/Idle gap boundary/i)).toHaveLength(1);
