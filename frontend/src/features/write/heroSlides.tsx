@@ -16,7 +16,6 @@ export type HeroSlide = {
 
 const guardianLink =
   'https://www.theguardian.com/technology/2024/dec/15/i-received-a-first-but-it-felt-tainted-and-undeserved-inside-the-university-ai-cheating-crisis';
-const researchLink = 'https://educationaldatamining.org/edm2024/proceedings/2024.EDM-short-papers.47/';
 
 // Shared onboarding cards rendered in the hero modal and About tab.
 export const heroSlides: HeroSlide[] = [
@@ -36,11 +35,7 @@ export const heroSlides: HeroSlide[] = [
       </>,
       'i-typed-this records your typing, pauses, and deletions, saves the replay, and keeps everything free, focused, and private.',
       <>
-        Result: Clear evidence that i-typed-this, which is based on{' '}
-        <a href={researchLink} target="_blank" rel="noreferrer" className="font-semibold text-slate-900 underline">
-          research
-        </a>
-        .
+        Result: Clear, research-backed evidence of how you typed it.
       </>,
     ],
     result: 'Record once, keep the zip, and you’re covered.',

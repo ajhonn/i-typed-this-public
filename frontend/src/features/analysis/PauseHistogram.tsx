@@ -65,8 +65,8 @@ const PauseHistogram = () => {
           <p className="text-xs uppercase tracking-[0.4em] text-slate-500">Pause analysis</p>
           <h3 className="text-xl font-semibold text-slate-900">Distribution of observed pauses</h3>
           <p className="mt-2 text-sm text-slate-600">
-            Buckets mirror the thresholds from docs/frontend-analysis-methodology.md and the histogram call-out in docs/frontend-visualizations.md.
-            Longer pre-burst pauses often signal authentic drafting.
+            These buckets (short, medium, long) highlight when a pause gives the writer space to think. Longer pre-burst pauses are one research-backed sign
+            of authentic drafting.
           </p>
         </div>
         {totalPauses ? (

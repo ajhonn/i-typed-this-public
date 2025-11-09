@@ -6,7 +6,7 @@ const AboutRoute = () => {
     <ShellLayout
       activeTab="about"
       title="About i-typed-this"
-      description="The recorder, playback, and analysis stack turns accusations into evidence students can carry anywhere."
+      description="The recorder, playback, and analysis tool turns accusations into portable evidence students can carry anywhere."
     >
       <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" data-testid="about-route">
         <div>
@@ -20,7 +20,7 @@ const AboutRoute = () => {
         <ul className="grid gap-2 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600 sm:grid-cols-3">
           <li className="font-semibold text-slate-900">Record · private, in-browser tracking</li>
           <li className="font-semibold text-slate-900">Replay · show how the draft formed</li>
-          <li className="font-semibold text-slate-900">Analyse · highlight signal vs. suspicion</li>
+          <li className="font-semibold text-slate-900">Analyse · identify authentic writing patterns</li>
         </ul>
       </section>
 

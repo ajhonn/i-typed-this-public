@@ -75,7 +75,8 @@ const SessionSignalsRadar = ({
             <p className="text-xs uppercase tracking-[0.4em] text-slate-500">Signals summary</p>
             <h3 className="text-xl font-semibold text-slate-900">Authorship radar</h3>
             <p className="mt-2 text-sm text-slate-600">
-              Each axis reflects a metric from docs/frontend-analysis-methodology.md — hover to inspect values and spot weak spots at a glance.
+              Each spoke is a research-backed indicator (pause rhythm, revisions, bursts, paste risk, and process depth). Hover to see the percent value and
+              judge if the playback deserves closer work.
             </p>
           </div>
         </div>
