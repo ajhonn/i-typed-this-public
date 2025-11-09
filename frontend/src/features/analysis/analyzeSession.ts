@@ -109,6 +109,8 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
   const processProductTimeline: ProcessProductPoint[] = [];
   const sessionStart = analyzableEvents[0]?.timestamp ?? 0;
   let timelineElapsed = 0;
+  let processArea = 0;
+  let productArea = 0;
 
   analyzableEvents.forEach((event, index) => {
     if (event.source === 'transaction' && (event.type === 'text-input' || event.type === 'delete')) {
@@ -240,12 +242,21 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
     }
 
     const documentChars = textFromHTML(event.meta.html ?? '').length;
-    processProductTimeline.push({
+    const point = {
       timestamp: event.timestamp,
       elapsedMs: timelineElapsed,
       producedChars: ctx.producedChars,
       documentChars,
-    });
+    };
+    const previousPoint = processProductTimeline[processProductTimeline.length - 1];
+    if (previousPoint) {
+      const avgProduced = (previousPoint.producedChars + point.producedChars) / 2;
+      const avgDocument = (previousPoint.documentChars + point.documentChars) / 2;
+      const deltaSeconds = Math.max(point.elapsedMs - previousPoint.elapsedMs, 0) / 1000;
+      processArea += avgProduced * deltaSeconds;
+      productArea += avgDocument * deltaSeconds;
+    }
+    processProductTimeline.push(point);
 
     ctx.lastTimestamp = end;
 
@@ -261,7 +272,7 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
   const finalWordCount = wordCount(plainText);
   const finalCharCount = plainText.length;
   const producedChars = ctx.producedChars || finalCharCount;
-  const productProcessRatio = finalCharCount ? producedChars / finalCharCount : 0;
+  const fallbackRatio = finalCharCount ? producedChars / finalCharCount : 0;
 
   const lastAnalyzableEvent = analyzableEvents[analyzableEvents.length - 1];
   const finalTimelineTimestamp = lastAnalyzableEvent ? lastAnalyzableEvent.timestamp : sessionStart;
@@ -273,27 +284,28 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
       documentChars: finalCharCount,
     });
   } else {
+    const syntheticPoint = {
+      timestamp: finalTimelineTimestamp,
+      elapsedMs: timelineElapsed,
+      producedChars,
+      documentChars: finalCharCount,
+    };
     const lastPoint = processProductTimeline[processProductTimeline.length - 1];
-    if (
-      lastPoint.elapsedMs !== timelineElapsed ||
-      lastPoint.producedChars !== producedChars ||
-      lastPoint.documentChars !== finalCharCount
-    ) {
-      processProductTimeline.push({
-        timestamp: finalTimelineTimestamp,
-        elapsedMs: timelineElapsed,
-        producedChars,
-        documentChars: finalCharCount,
-      });
+    if (!lastPoint || lastPoint.elapsedMs !== syntheticPoint.elapsedMs) {
+      const prevPoint = processProductTimeline[processProductTimeline.length - 1];
+      processProductTimeline.push(syntheticPoint);
+      if (prevPoint) {
+        const avgProduced = (prevPoint.producedChars + syntheticPoint.producedChars) / 2;
+        const avgDocument = (prevPoint.documentChars + syntheticPoint.documentChars) / 2;
+        const deltaSeconds = Math.max(syntheticPoint.elapsedMs - prevPoint.elapsedMs, 0) / 1000;
+        processArea += avgProduced * deltaSeconds;
+        productArea += avgDocument * deltaSeconds;
+      }
     } else {
-      processProductTimeline[processProductTimeline.length - 1] = {
-        ...lastPoint,
-        timestamp: finalTimelineTimestamp,
-        producedChars,
-        documentChars: finalCharCount,
-      };
+      processProductTimeline[processProductTimeline.length - 1] = syntheticPoint;
     }
   }
+  const productProcessRatio = productArea > 0 ? processArea / productArea : fallbackRatio;
   const averageMacroPause = ctx.macroPauseCount ? ctx.macroPauseTotal / ctx.macroPauseCount : 0;
   const pauseScore = clamp(averageMacroPause / 4000, 0, 1);
   const revisionScore = ctx.textInputCount ? ctx.deleteCount / ctx.textInputCount : ctx.deleteCount > 0 ? 1 : 0;

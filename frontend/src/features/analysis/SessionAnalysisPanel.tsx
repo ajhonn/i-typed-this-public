@@ -102,6 +102,7 @@ const SessionAnalysisPanel = ({ showRadar = true }: SessionAnalysisPanelProps) =
             </div>
             <p className="text-3xl font-semibold text-slate-900">{metric.value}</p>
             {metric.helperText ? <p className="text-xs font-medium text-slate-500">{metric.helperText}</p> : null}
+            {metric.runtimeRatio ? <p className="text-xs text-slate-500">{metric.runtimeRatio}</p> : null}
             <div className="flex flex-col gap-1">
               <div className="h-2 w-full rounded-full bg-slate-200">
                 <div

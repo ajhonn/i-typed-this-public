@@ -51,7 +51,7 @@ const ProcessProductChart = () => {
   }, [analysis.processProductTimeline]);
 
   const hasData = chartData.length > 1 || producedTotal > 0 || productTotal > 0;
-  const ratio = productTotal ? Math.min(producedTotal / productTotal, 2) : 0;
+  const ratio = analysis.signals.productProcessRatio ?? 0;
 
   return (
     <section id="analysis-process-card" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm" data-testid="process-product-chart">
