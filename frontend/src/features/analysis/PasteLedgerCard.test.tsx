@@ -27,7 +27,7 @@ const SeedUnmatchedPaste = () => {
       appendEvent({
         id: `evt-paste-${index}`,
         type: 'paste',
-        source: 'dom',
+        source: 'transaction',
         timestamp: 7000 + index * 200,
         meta: {
           docSize: 25 + payload.length,
@@ -35,7 +35,12 @@ const SeedUnmatchedPaste = () => {
           selection: { from: 25 + payload.length, to: 25 + payload.length },
           docChanged: true,
           html: `<p>Hello${payload}</p>`,
-          domInput: { inputType: 'insertFromPaste', data: payload },
+          pastePayload: {
+            text: payload,
+            length: payload.length,
+            preview: payload.slice(0, 40),
+            source: 'external',
+          },
         },
       });
     });

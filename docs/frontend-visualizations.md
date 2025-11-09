@@ -27,6 +27,9 @@
 - **Paste Classification Donut** *(V1+)*
   Shows proportions of `internal`, `duplicate`, `unmatched`.
   *Why*: Quick visual for clipboard behaviour; complements timeline markers.
+- **Process vs Product Timeline** *(MVP)*
+  Dual-line chart comparing cumulative typed characters against evolving document length.
+  *Why*: Makes it obvious whether the student actually typed more than the final submission, flagging transcription spikes instantly.
 
 ## Comparative & Profile Views
 - **Persona Radar / Spider Plot** *(V1+ → Delight)*

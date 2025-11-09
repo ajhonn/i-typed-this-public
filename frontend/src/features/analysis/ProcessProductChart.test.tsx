@@ -1,14 +1,14 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import { useEffect } from 'react';
 import { MemoryRouter } from 'react-router';
-import SessionAnalysisPanel from './SessionAnalysisPanel';
+import { useEffect } from 'react';
+import ProcessProductChart from './ProcessProductChart';
 import { SessionProvider, useSession } from '@features/session/SessionProvider';
 
-const SeedAnalysis = () => {
+const SeedSession = () => {
   const { appendEvent, setEditorHTML } = useSession();
 
   useEffect(() => {
-    setEditorHTML('<p>Hello world</p>');
+    setEditorHTML('<p>Hello</p>');
     appendEvent({
       id: 'evt-1',
       type: 'text-input',
@@ -27,7 +27,7 @@ const SeedAnalysis = () => {
       id: 'evt-2',
       type: 'paste',
       source: 'transaction',
-      timestamp: 6000,
+      timestamp: 5000,
       meta: {
         docSize: 11,
         stepTypes: [],
@@ -47,23 +47,19 @@ const SeedAnalysis = () => {
   return null;
 };
 
-describe('SessionAnalysisPanel', () => {
-  it('renders analysis verdict and metrics', async () => {
+describe('ProcessProductChart', () => {
+  it('renders process vs product ratio when data exists', async () => {
     render(
       <MemoryRouter>
         <SessionProvider>
-          <SeedAnalysis />
-          <SessionAnalysisPanel />
+          <SeedSession />
+          <ProcessProductChart />
         </SessionProvider>
       </MemoryRouter>
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('session-analysis')).toBeInTheDocument();
-    });
-    expect(screen.getByTestId('signals-radar')).toBeInTheDocument();
-    expect(screen.getByText(/Authorship signals/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/Paste cleanliness/i).length).toBeGreaterThan(0);
-    expect(screen.getByRole('link', { name: /open analysis workspace/i })).toHaveAttribute('href', '/analysis');
+    await waitFor(() => expect(screen.getByTestId('process-product-chart')).toBeInTheDocument());
+    expect(screen.getByText(/Process vs\. product/i)).toBeInTheDocument();
+    expect(screen.getByText(/process \/ product ratio/i)).toBeInTheDocument();
   });
 });

@@ -1,9 +1,14 @@
 import type { RecorderEvent } from '@features/recorder/types';
-import type { SessionAnalysis, TimelineSegment, BurstStat, PasteInsight } from './types';
+import type { SessionAnalysis, TimelineSegment, BurstStat, PasteInsight, ProcessProductPoint } from './types';
 
 const MICRO_PAUSE_MS = 200;
 const MACRO_PAUSE_MS = 2000;
 const MIN_EVENT_DURATION = 16;
+const IDLE_GAP_THRESHOLD_MS = 4000;
+const COMPRESSED_GAP_DURATION_MS = 600;
+const PRODUCT_PROCESS_LOW_THRESHOLD = 1.05;
+const PRODUCT_PROCESS_STRONG_THRESHOLD = 1.25;
+const PRODUCT_PROCESS_MAX = 2;
 
 const PAUSE_BUCKETS = [
   { key: 'lt-200', label: '<200 ms', min: 0, max: MICRO_PAUSE_MS },
@@ -89,10 +94,29 @@ const pushSegment = (
 
 export const analyzeSession = (events: RecorderEvent[], finalHtml: string): SessionAnalysis => {
   const sortedEvents = [...events].sort((a, b) => a.timestamp - b.timestamp);
+  const shouldSkipEvent = (event: RecorderEvent) => {
+    if (event.source === 'transaction' && (event.type === 'text-input' || event.type === 'delete')) {
+      return true;
+    }
+    if (event.source === 'dom' && event.type === 'paste') {
+      return true;
+    }
+    return false;
+  };
+  const analyzableEvents = sortedEvents.filter((event) => !shouldSkipEvent(event));
   const ctx = initContext();
   const pasteLog: PasteInsight[] = [];
+  const processProductTimeline: ProcessProductPoint[] = [];
+  const sessionStart = analyzableEvents[0]?.timestamp ?? 0;
+  let timelineElapsed = 0;
 
-  sortedEvents.forEach((event) => {
+  analyzableEvents.forEach((event, index) => {
+    if (event.source === 'transaction' && (event.type === 'text-input' || event.type === 'delete')) {
+      return;
+    }
+    if (event.source === 'dom' && event.type === 'paste') {
+      return;
+    }
     const duration = Math.max(event.meta.durationMs ?? MIN_EVENT_DURATION, MIN_EVENT_DURATION);
     const start = event.timestamp;
     const end = event.timestamp + duration;
@@ -215,7 +239,20 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
       finalizeBurst(ctx);
     }
 
+    const documentChars = textFromHTML(event.meta.html ?? '').length;
+    processProductTimeline.push({
+      timestamp: event.timestamp,
+      elapsedMs: timelineElapsed,
+      producedChars: ctx.producedChars,
+      documentChars,
+    });
+
     ctx.lastTimestamp = end;
+
+    const nextEvent = analyzableEvents[index + 1];
+    const rawGap = nextEvent ? Math.max(nextEvent.timestamp - event.timestamp, MIN_EVENT_DURATION) : MIN_EVENT_DURATION;
+    const timelineAdvance = rawGap > IDLE_GAP_THRESHOLD_MS ? COMPRESSED_GAP_DURATION_MS : rawGap;
+    timelineElapsed += timelineAdvance;
   });
 
   finalizeBurst(ctx);
@@ -225,6 +262,38 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
   const finalCharCount = plainText.length;
   const producedChars = ctx.producedChars || finalCharCount;
   const productProcessRatio = finalCharCount ? producedChars / finalCharCount : 0;
+
+  const lastAnalyzableEvent = analyzableEvents[analyzableEvents.length - 1];
+  const finalTimelineTimestamp = lastAnalyzableEvent ? lastAnalyzableEvent.timestamp : sessionStart;
+  if (!processProductTimeline.length) {
+    processProductTimeline.push({
+      timestamp: sessionStart,
+      elapsedMs: 0,
+      producedChars,
+      documentChars: finalCharCount,
+    });
+  } else {
+    const lastPoint = processProductTimeline[processProductTimeline.length - 1];
+    if (
+      lastPoint.elapsedMs !== timelineElapsed ||
+      lastPoint.producedChars !== producedChars ||
+      lastPoint.documentChars !== finalCharCount
+    ) {
+      processProductTimeline.push({
+        timestamp: finalTimelineTimestamp,
+        elapsedMs: timelineElapsed,
+        producedChars,
+        documentChars: finalCharCount,
+      });
+    } else {
+      processProductTimeline[processProductTimeline.length - 1] = {
+        ...lastPoint,
+        timestamp: finalTimelineTimestamp,
+        producedChars,
+        documentChars: finalCharCount,
+      };
+    }
+  }
   const averageMacroPause = ctx.macroPauseCount ? ctx.macroPauseTotal / ctx.macroPauseCount : 0;
   const pauseScore = clamp(averageMacroPause / 4000, 0, 1);
   const revisionScore = ctx.textInputCount ? ctx.deleteCount / ctx.textInputCount : ctx.deleteCount > 0 ? 1 : 0;
@@ -245,28 +314,36 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
     productProcessRatio,
   };
 
+  const metricAlerts: Record<string, boolean> = {};
   let risk = 0;
   const reasoning: string[] = [];
 
   if (ctx.suspiciousPasteCount > 0) {
     risk += 2;
     reasoning.push('Detected unmatched paste segments.');
+    metricAlerts.pasteRisk = true;
   }
   if (ctx.textInputCount > 30 && revisionScore < 0.12) {
     risk += 1;
     reasoning.push('Low revision activity relative to typed content.');
+    metricAlerts.revisionScore = true;
   }
   if (burstVariance < 0.2 && ctx.bursts.length > 2) {
     risk += 1;
     reasoning.push('Burst pacing is highly uniform.');
+    metricAlerts.burstVariance = true;
   }
   if (pauseScore > 0.55 && ctx.macroPauseCount > 0) {
     risk -= 1;
     reasoning.push('Healthy macro pauses observed before bursts.');
   }
-  if (productProcessRatio < 0.8 && ctx.textInputCount > 20) {
+  if (productProcessRatio <= PRODUCT_PROCESS_LOW_THRESHOLD && ctx.textInputCount > 10) {
+    risk += 1;
+    reasoning.push('Process depth is flat—output closely matches what was typed.');
+    metricAlerts.productProcess = true;
+  } else if (productProcessRatio >= PRODUCT_PROCESS_STRONG_THRESHOLD && ctx.textInputCount > 10) {
     risk -= 1;
-    reasoning.push('Product-process ratio suggests authentic drafting.');
+    reasoning.push('Process depth indicates iterative drafting.');
   }
 
   if (!reasoning.length) {
@@ -286,9 +363,25 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
   const pasteScoreNormalized = ctx.pasteCount
     ? clamp(1 - ctx.suspiciousPasteCount / ctx.pasteCount, 0, 1)
     : 1;
-  const productProcessNormalized = clamp(1 - Math.min(productProcessRatio, 1), 0, 1);
+  const productProcessNormalized = clamp(
+    (productProcessRatio - PRODUCT_PROCESS_LOW_THRESHOLD) / Math.max(PRODUCT_PROCESS_MAX - PRODUCT_PROCESS_LOW_THRESHOLD, 0.0001),
+    0,
+    1
+  );
 
-  const metrics = [
+  const productProcessTrend = productProcessRatio <= PRODUCT_PROCESS_LOW_THRESHOLD
+    ? 'negative'
+    : productProcessRatio >= PRODUCT_PROCESS_STRONG_THRESHOLD
+      ? 'positive'
+      : undefined;
+
+  const metricDetailTargets: Record<string, string | undefined> = {
+    pauseScore: 'analysis-pause-card',
+    pasteRisk: 'analysis-paste-ledger-card',
+    productProcess: 'analysis-process-card',
+  };
+
+  const baseMetrics = [
     {
       key: 'pauseScore',
       label: 'Pause cadence',
@@ -329,10 +422,16 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
       label: 'Process depth',
       value: productProcessRatio.toFixed(2),
       helperText: `${finalWordCount} final words`,
-      description: 'Lower ratios mean the student typed more than what survived, which signals drafting.',
+      description: `Ratios above ${PRODUCT_PROCESS_LOW_THRESHOLD.toFixed(2)} mean the student typed more than what survived, which signals drafting. Anything near that threshold is flagged.`,
       score: productProcessNormalized,
+      trend: productProcessTrend,
     },
   ];
+  const metrics = baseMetrics.map((metric) => ({
+    ...metric,
+    alert: metricAlerts[metric.key] ?? false,
+    detailTarget: metricDetailTargets[metric.key],
+  }));
 
   const pauseHistogram = PAUSE_BUCKETS.map((bucket) => ({
     key: bucket.key,
@@ -353,5 +452,6 @@ export const analyzeSession = (events: RecorderEvent[], finalHtml: string): Sess
     verdict,
     verdictReasoning: reasoning,
     pastes: pasteLog,
+    processProductTimeline,
   };
 };

@@ -30,6 +30,19 @@ const SessionAnalysisPanel = ({ showRadar = true }: SessionAnalysisPanelProps) =
     'Low process depth combined with low variance often indicates text was imported rather than authored here.',
   ];
 
+  const handleLearnMore = (targetId: string) => {
+    if (typeof document !== 'undefined') {
+      const target = document.getElementById(targetId);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+    }
+    if (typeof window !== 'undefined') {
+      window.location.href = `${ROUTES.analysis}#${targetId}`;
+    }
+  };
+
   return (
     <section className="grid gap-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" data-testid="session-analysis">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -61,17 +74,31 @@ const SessionAnalysisPanel = ({ showRadar = true }: SessionAnalysisPanelProps) =
       ) : null}
 
       <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(200px,1fr))]">
-        {analysis.metrics.map((metric) => (
-          <div key={metric.key} className="space-y-3 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+        {analysis.metrics.map((metric) => {
+          const trendLabel = metric.alert
+            ? 'Needs review'
+            : metric.trend === 'positive'
+              ? 'Strong'
+              : metric.trend === 'negative'
+                ? 'Low'
+                : 'Neutral';
+          const trendColor = metric.alert
+            ? 'text-orange-700'
+            : metric.trend === 'positive'
+              ? 'text-emerald-600'
+              : metric.trend === 'negative'
+                ? 'text-rose-600'
+                : 'text-slate-400';
+          const cardTone = metric.alert ? 'border-orange-300 bg-orange-50 shadow-sm' : 'border-slate-100 bg-slate-50';
+          const buttonTone = metric.alert
+            ? 'border-orange-300 text-orange-700 hover:bg-orange-100'
+            : 'border-slate-300 text-slate-700 hover:bg-slate-900 hover:text-white';
+
+          return (
+            <div key={metric.key} className={`space-y-3 rounded-2xl border p-4 transition ${cardTone}`}>
             <div className="flex items-center justify-between gap-2">
               <p className="text-xs uppercase tracking-wide text-slate-500">{metric.label}</p>
-              <span
-                className={`text-[11px] font-semibold uppercase ${
-                  metric.trend === 'positive' ? 'text-emerald-600' : metric.trend === 'negative' ? 'text-rose-600' : 'text-slate-400'
-                }`}
-              >
-                {metric.trend === 'positive' ? 'Strong' : metric.trend === 'negative' ? 'Low' : 'Neutral'}
-              </span>
+              <span className={`text-[11px] font-semibold uppercase ${trendColor}`}>{trendLabel}</span>
             </div>
             <p className="text-3xl font-semibold text-slate-900">{metric.value}</p>
             {metric.helperText ? <p className="text-xs font-medium text-slate-500">{metric.helperText}</p> : null}
@@ -85,8 +112,18 @@ const SessionAnalysisPanel = ({ showRadar = true }: SessionAnalysisPanelProps) =
               </div>
               {metricDescriptions[metric.key] ? <p className="text-xs text-slate-500">{metricDescriptions[metric.key]}</p> : null}
             </div>
+            {metric.detailTarget ? (
+              <button
+                type="button"
+                onClick={() => handleLearnMore(metric.detailTarget!)}
+                className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wide ${buttonTone}`}
+              >
+                Learn more
+              </button>
+            ) : null}
           </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="rounded-xl border border-slate-100 bg-white p-4">
