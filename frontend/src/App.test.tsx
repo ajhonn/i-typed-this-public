@@ -41,6 +41,7 @@ describe('App routing', () => {
     );
 
     expect(screen.getByTestId('analysis-overview')).toBeInTheDocument();
+    expect(screen.getByTestId('session-analysis')).toBeInTheDocument();
   });
 
   it(
@@ -60,7 +61,7 @@ describe('App routing', () => {
       const user = userEvent.setup();
       render(<App />);
       await user.click(screen.getByRole('link', { name: /analysis/i }));
-      expect(await screen.findByTestId('analysis-overview')).toBeInTheDocument();
+      expect(await screen.findByTestId('session-analysis')).toBeInTheDocument();
     },
     10000
   );

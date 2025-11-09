@@ -1,4 +1,5 @@
 import ShellLayout from '@features/shell/ShellLayout';
+import SessionAnalysisPanel from './SessionAnalysisPanel';
 
 const AnalysisRoute = () => {
   return (
@@ -22,9 +23,7 @@ const AnalysisRoute = () => {
             <li>Plot bursts + WPM and compare against cohort guardrails.</li>
           </ul>
         </div>
-        <div className="rounded-3xl border border-dashed border-slate-300 bg-white/70 p-6 text-sm text-slate-500">
-          Authorship signals surface here next. Keeping the canvas ready prevents rework once the visualisations are ready.
-        </div>
+        <SessionAnalysisPanel />
       </div>
     </ShellLayout>
   );
