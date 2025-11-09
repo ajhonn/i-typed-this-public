@@ -26,6 +26,13 @@
 - [ ] Match paste events against clipboard ledger and in-document hashes.
 - [ ] Aggregate session summary metrics (pause score, burst variance, paste anomaly count).
 
+## Analysis Insights Workspace
+> Extends `docs/frontend-analysis-methodology.md` and `docs/frontend-visualizations.md` by giving the analysis panel a full-page home.
+- [ ] `feat: scaffold analysis workspace` — add a dedicated `/analysis` route + ribbon tab and reuse `ShellLayout` for reviewer tooling.
+- [ ] `feat: surface existing panel on the analysis page` — mount `SessionAnalysisPanel` and align layout spacing for future charts.
+- [ ] `feat: add pause distribution histogram` — expose pause buckets from the analyzer and render the MVP histogram with accessible summaries.
+- [ ] `feat: plot WPM & burst pacing comparison` — derive WPM/burst stats, plot the series, and compare against cohort baselines.
+
 ## Playback Experience
 - [x] Create basic read-only Tiptap view driven by recorder snapshots (no timeline yet).
 - [x] Build timeline drawer with segmented bar, play/pause, speed control, scrubber markers.

@@ -30,6 +30,19 @@ describe('App routing', () => {
     expect(screen.getByTestId('playback-editor')).toBeInTheDocument();
   });
 
+  it('renders the analysis workspace when navigating to /analysis', () => {
+    const router = createMemoryRouter(appRoutes, {
+      initialEntries: [ROUTES.analysis],
+    });
+    render(
+      <SessionProvider>
+        <RouterProvider router={router} />
+      </SessionProvider>
+    );
+
+    expect(screen.getByTestId('analysis-overview')).toBeInTheDocument();
+  });
+
   it(
     'navigates to playback via the ribbon tab',
     async () => {
@@ -37,6 +50,17 @@ describe('App routing', () => {
       render(<App />);
       await user.click(screen.getByRole('link', { name: /playback/i }));
       expect(screen.getByTestId('playback-editor')).toBeInTheDocument();
+    },
+    10000
+  );
+
+  it(
+    'navigates to analysis via the ribbon tab',
+    async () => {
+      const user = userEvent.setup();
+      render(<App />);
+      await user.click(screen.getByRole('link', { name: /analysis/i }));
+      expect(await screen.findByTestId('analysis-overview')).toBeInTheDocument();
     },
     10000
   );

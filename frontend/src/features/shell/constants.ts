@@ -14,6 +14,12 @@ export const SHELL_TABS = [
     helper: 'Inspect timelines',
   },
   {
+    key: 'analysis',
+    label: 'Analysis',
+    path: ROUTES.analysis,
+    helper: 'Deep-dive signals',
+  },
+  {
     key: 'learn',
     label: 'Learn',
     path: ROUTES.learn,

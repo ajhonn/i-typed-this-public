@@ -14,7 +14,7 @@ type RibbonProps = {
 
 const Ribbon = ({ activeTab, endSlot }: RibbonProps) => {
   const { recorderState } = useSession();
-  const sessionState = activeTab === 'playback' ? 'reviewing' : recorderState;
+  const sessionState = activeTab === 'playback' || activeTab === 'analysis' ? 'reviewing' : recorderState;
   const writerEditor = useWriterEditorContext();
 
   return (

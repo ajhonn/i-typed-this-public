@@ -1,6 +1,7 @@
 export const ROUTES = {
   write: '/write',
   playback: '/playback',
+  analysis: '/analysis',
   learn: '/learn',
 } as const;
 
