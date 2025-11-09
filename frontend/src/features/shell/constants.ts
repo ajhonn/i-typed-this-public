@@ -20,10 +20,10 @@ export const SHELL_TABS = [
     helper: 'Deep-dive signals',
   },
   {
-    key: 'learn',
-    label: 'Learn',
-    path: ROUTES.learn,
-    helper: 'Read the product story',
+    key: 'about',
+    label: 'About',
+    path: ROUTES.about,
+    helper: 'Product story & proof',
   },
 ] as const;
 
