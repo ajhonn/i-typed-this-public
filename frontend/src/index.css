@@ -76,6 +76,18 @@ body {
   caret-color: inherit;
 }
 
+.unmatched-paste-block {
+  background: #fff7ed;
+  border-left: 4px solid #fb923c;
+  border-radius: 0.5rem;
+  color: #9a3412;
+  font-family: 'JetBrains Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.9rem;
+  padding: 0.85rem 1rem;
+  margin: 0.75rem 0;
+  white-space: pre-wrap;
+}
+
 @keyframes recordingRainbowShift {
   0% {
     transform: translateY(-20%);

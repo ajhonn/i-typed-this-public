@@ -28,7 +28,7 @@
 
 ## Playback Experience
 - [x] Create basic read-only Tiptap view driven by recorder snapshots (no timeline yet).
-- [ ] Build timeline drawer with segmented bar, play/pause, speed control, scrubber markers.
+- [x] Build timeline drawer with segmented bar, play/pause, speed control, scrubber markers.
 - [ ] Render summary cards (duration, words, unmatched pastes) and pause histogram chart.
 - [ ] Highlight text during playback to match timeline segments.
 

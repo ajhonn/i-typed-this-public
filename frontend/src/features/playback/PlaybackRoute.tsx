@@ -43,8 +43,10 @@ const PlaybackRoute = () => {
         showHeader={false}
         ribbonAction={ribbonButton}
       >
-        <PlaybackPlayer />
-        <PlaybackInsightsDrawer open={drawerOpen} />
+        <div className="flex flex-col gap-8 pb-96">
+          <PlaybackPlayer />
+          <PlaybackInsightsDrawer open={drawerOpen} />
+        </div>
       </ShellLayout>
     </PlaybackProvider>
   );

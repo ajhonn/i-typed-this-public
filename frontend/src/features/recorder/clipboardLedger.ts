@@ -19,6 +19,10 @@ export type ClipboardLedgerEntry = {
 
 const ledger: ClipboardLedgerEntry[] = [];
 
+const normalizeText = (text: string) => {
+  return text.replace(/\s+/g, ' ').trim();
+};
+
 const fnv1a = (text: string) => {
   let hash = 0x811c9dc5;
   for (let i = 0; i < text.length; i += 1) {
@@ -52,7 +56,8 @@ export const recordClipboardEntry = ({
   selection: { from: number; to: number };
   timestamp?: number;
 }) => {
-  if (!text) {
+  const normalized = normalizeText(text);
+  if (!normalized) {
     return null;
   }
   pruneLedger(timestamp);
@@ -60,10 +65,10 @@ export const recordClipboardEntry = ({
     id,
     timestamp,
     action,
-    text,
-    length: text.length,
-    hash: fnv1a(text),
-    preview: text.slice(0, 200),
+    text: normalized,
+    length: normalized.length,
+    hash: fnv1a(normalized),
+    preview: normalized.slice(0, 200),
     selection,
   };
   ledger.push(entry);
@@ -71,13 +76,14 @@ export const recordClipboardEntry = ({
 };
 
 export const matchClipboardText = (text: string) => {
-  if (!text) {
+  const normalized = normalizeText(text);
+  if (!normalized) {
     return null;
   }
   const now = Date.now();
   pruneLedger(now);
-  const hash = fnv1a(text);
-  return ledger.find((entry) => entry.hash === hash && entry.length === text.length) ?? null;
+  const hash = fnv1a(normalized);
+  return ledger.find((entry) => entry.hash === hash && entry.length === normalized.length) ?? null;
 };
 
 export const clearClipboardLedger = () => {

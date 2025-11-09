@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useEditor } from '@tiptap/react';
+import type { Editor } from '@tiptap/react';
 import { StarterKit } from '@tiptap/starter-kit';
 import { Image } from '@tiptap/extension-image';
 import { TaskItem, TaskList } from '@tiptap/extension-list';
@@ -21,9 +22,34 @@ import '@features/components/tiptap-node/image-node/image-node.scss';
 import '@features/components/tiptap-node/heading-node/heading-node.scss';
 import '@features/components/tiptap-node/paragraph-node/paragraph-node.scss';
 import { useRecorder } from '@features/recorder/useRecorder';
-import { PasteCaptureExtension } from '@features/playback/extensions/PasteCaptureExtension';
+import { PasteCaptureExtension, consumePendingUnmatchedAlert } from '@features/playback/extensions/PasteCaptureExtension';
 
 const EDITOR_CLASS = 'simple-editor writer-editor-content';
+
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+const formatUnmatchedPaste = (snippet: string, editor: Editor) => {
+  if (!editor) return;
+  const trimmed = snippet.replace(/\s+/g, ' ').trim();
+  if (!trimmed.length) return;
+  const safeSnippet = escapeHtml(trimmed);
+  const selection = editor.state.selection;
+  const end = selection.from;
+  const start = Math.max(end - snippet.length, 0);
+  editor
+    .chain()
+    .focus()
+    .setTextSelection({ from: start, to: end })
+    .insertContent(`<pre class="unmatched-paste-block"><code>${safeSnippet}</code></pre>`)
+    .setTextSelection({ from: start + safeSnippet.length, to: start + safeSnippet.length })
+    .run();
+};
 
 export const useWriterEditor = () => {
   const { session, setEditorHTML } = useSession();
@@ -84,6 +110,24 @@ export const useWriterEditor = () => {
       });
     }
   }, [editor, session.editorHTML]);
+
+  useEffect(() => {
+    if (!editor) return;
+    const handleTransaction = () => {
+      const alert = consumePendingUnmatchedAlert();
+      if (!alert || !alert.text) return;
+      formatUnmatchedPaste(alert.text, editor);
+      window.dispatchEvent(
+        new CustomEvent('writer-unmatched-paste', {
+          detail: { snippet: alert.text.replace(/\s+/g, ' ').trim() },
+        })
+      );
+    };
+    editor.on('transaction', handleTransaction);
+    return () => {
+      editor.off('transaction', handleTransaction);
+    };
+  }, [editor]);
 
   return editor;
 };

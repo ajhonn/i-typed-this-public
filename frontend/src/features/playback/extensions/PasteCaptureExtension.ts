@@ -18,6 +18,14 @@ export const setPendingPastePayload = (payload: PastePayload | null) => {
 
 export const getPendingPastePayload = () => pendingPayload;
 
+let pendingUnmatchedAlert: { text: string } | null = null;
+
+export const consumePendingUnmatchedAlert = () => {
+  const alert = pendingUnmatchedAlert;
+  pendingUnmatchedAlert = null;
+  return alert;
+};
+
 export const PasteCaptureExtension = Extension.create({
   name: 'pasteCapture',
 
@@ -26,7 +34,7 @@ export const PasteCaptureExtension = Extension.create({
       new Plugin({
         props: {
           handlePaste: (_view, event) => {
-            const text = event.clipboardData?.getData('text/plain') ?? '';
+            const text = (event.clipboardData?.getData('text/plain') ?? '').replace(/\s+/g, ' ').trim();
             const now = Date.now();
             const ledgerMatch = matchClipboardText(text);
             const payload: PastePayload = {
@@ -36,6 +44,9 @@ export const PasteCaptureExtension = Extension.create({
               matchedCopyId: ledgerMatch?.id,
               ledgerAgeMs: ledgerMatch ? now - ledgerMatch.timestamp : undefined,
             };
+            if (!ledgerMatch && text) {
+              pendingUnmatchedAlert = { text };
+            }
             setPendingPastePayload(payload);
             if (import.meta.env.DEV) {
               console.info('[Recorder] handlePaste payload captured', payload);
