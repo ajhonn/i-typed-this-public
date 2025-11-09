@@ -42,6 +42,10 @@ describe('WriteRoute', () => {
       </SessionProvider>
     );
     expect(await screen.findByTestId('hero-modal')).toBeInTheDocument();
+    // Advance through the intro deck until the Start writing cta appears.
+    while (!screen.queryByRole('button', { name: /start writing/i })) {
+      await user.click(screen.getByRole('button', { name: /next/i }));
+    }
     await user.click(screen.getByRole('button', { name: /start writing/i }));
     expect(screen.queryByTestId('hero-modal')).not.toBeInTheDocument();
     },
