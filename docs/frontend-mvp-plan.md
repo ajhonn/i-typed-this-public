@@ -73,6 +73,13 @@ Capture these ideas now so later milestones can prioritize deeper authorship sig
 - **Rolling diff snapshots**: compute edit-distance windows to quantify insert/delete/substitute balance; low deletion share across long sessions signals transcription.
 - **Paste provenance follow-up**: once unmatched pastes land, track whether subsequent deletions sculpt the pasted text—lack of edits after a paste is a strong risk signal.
 
+## 6.2 Playback Persistence Enhancements (Planned)
+- **Session importer service**: extend `SessionProvider` with a dedicated `importSession` method that validates and replaces the editor HTML + event log, so UI surfaces can safely load external JSON blobs.
+- **Uploader in playback controls**: add a file input (mirroring the existing download action) inside `PlaybackToolbar` so reviewers can pick a `.json` session and send it through the importer for instant replay.
+- **Cache-backed autosave**: write the active session state to the Cache API (gated to modern browsers) on each mutation and restore it on provider mount to guard against accidental tab refreshes.
+- **Testing coverage**: add provider tests for autosave/import flows and toolbar tests that assert the upload button exists and calls the importer hook when a mock file is supplied.
+- **Docs sync**: once the feature lands, update `docs/frontend-recorder-schema.md` with any validation rules introduced during import and reference the autosave behavior inside `docs/frontend-analysis-methodology.md`’s workflow notes.
+
 ## 7. Testing Strategy (Overview)
 - **Unit tests**:
   - Recorder services (event normalization, clipboard ledger hashing).
