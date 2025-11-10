@@ -19,7 +19,8 @@ type SessionContextValue = {
 };
 
 const SessionContext = createContext<SessionContextValue | undefined>(undefined);
-const MAX_EVENTS = 2000;
+// TODO(recorder): replace this coarse limit with memory-aware trimming/streaming.
+const MAX_EVENTS = 1_000_000;
 
 const INITIAL_SESSION: SessionState = {
   editorHTML: '<p></p>',

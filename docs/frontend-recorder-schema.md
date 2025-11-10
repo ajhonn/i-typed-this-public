@@ -48,6 +48,21 @@ All events record the session `versionId` so playback and analysis can resolve d
   - `pause` events mark idle sections.
   - `paste` segments display hash-match status (`internal`, `duplicate`, `unmatched`) with distinct colours.
 
+## Recorder Memory Strategy
+
+- **Current safeguard:** the recorder now keeps up to 1,000,000 transaction events in memory before trimming the oldest entries. This buffers long drafting sessions without immediately threatening RAM usage, but it is still a blunt ceiling.
+- **Immediate TODO:** surface a visible error when we hit that limit so the user knows their timeline is frozen. (Recorder code currently carries a TODO to replace the limit with smarter management.)
+
+### Near-term improvements
+
+1. **Measure actual footprint.** When Chromium’s `performance.memory` is available, poll `usedJSHeapSize`/`jsHeapSizeLimit`; elsewhere fall back to estimating serialized session size (HTML snapshot bytes + event payloads). Use these numbers to warn well before OOMs.
+2. **Memory-aware throttling.** Instead of a fixed event count, pause recording once we exceed a configurable byte budget (e.g., 10–20 MB) and prompt the user to download/clear the session. This keeps data loss explicit rather than silent.
+
+### Backlog: archival compression
+
+- Split very long sessions into “chapters” (e.g., chunks of 5–10k events), compress each chunk individually, and stream them to disk (IndexedDB or backend storage). Playback would load chunks lazily, decompressing only the portion being reviewed.
+- Support re-compression of older chapters so we keep a lightweight in-memory head while retaining the full fidelity log on disk or in the exported zip (multiple compressed files bundled together).
+
 ## Open Questions
 
 - Confirm whether the chosen WYSIWYG editor exposes copy/cut hooks or if we must rely on DOM-level listeners.
