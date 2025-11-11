@@ -77,5 +77,6 @@ Create embeddable components / SDKs that capture the same telemetry and forward 
 
 ## 8. Next Steps
 - Draft API schema document (`docs/backend-api-spec.md`).
+- Implement the two-layer integrity plan: start with the client-side hash guard, then tackle the backlogged backend ledger per `docs/backend-session-hashing-plan.md`.
 - Evaluate hosting options (cloud provider, costs, compliance requirements).
 - Identify early partners or pilot institutions to validate requirements.
