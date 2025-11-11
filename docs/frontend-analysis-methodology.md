@@ -56,6 +56,11 @@ All rules should be tunable via configuration so thresholds can evolve without c
 - **Confidence scoring**: output probability with calibration, emphasising false-positive mitigation.
 - **Anomaly explanations**: attach narrative (e.g., “Large paste without matching copy; occurred after 3 min pause”).
 
+### 5.1 Lexical Revision Prioritisation (Proposed backlog)
+- **Word-level revision counter**: split text-input/delete events by whitespace/punctuation boundaries so we can track how often a specific word is edited, deleted, or reinserted. Metrics such as `wordsRevised / wordsProduced` should remain high during authentic drafting but collapse when someone merely transcribes.
+- **Sentence hash replay detection**: maintain rolling sentence hashes (boundary at `.?!` or double newline). When a hash disappears (sentence deleted) and later reappears unchanged, treat it as a “replay” that may signal retyping from another source to game process depth metrics.
+- **UI surfacing**: flag sessions with unusually low word-level revisions and frequent sentence replays inside the Insights panel so reviewers focus on likely transcription attempts.
+
 ## 6. Reviewer & UI Integration
 - Timeline colours map directly to segment types; unmatched pastes include tooltip with ledger status.
 - Provide quick stats panel (total words, authentic vs. suspicious segments, longest pause).
