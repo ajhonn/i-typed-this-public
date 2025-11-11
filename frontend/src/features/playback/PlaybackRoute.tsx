@@ -1,6 +1,7 @@
 import { useSearchParams } from 'react-router';
 import ShellLayout from '@features/shell/ShellLayout';
 import PlaybackPlayer from './PlaybackPlayer';
+import PlaybackUploadPrompt from './PlaybackUploadPrompt';
 import { PlaybackProvider } from './PlaybackControllerContext';
 
 const PlaybackRoute = () => {
@@ -17,6 +18,7 @@ const PlaybackRoute = () => {
         showHeader={false}
       >
         <div className="flex flex-col gap-8 pb-96">
+          <PlaybackUploadPrompt />
           <PlaybackPlayer />
         </div>
       </ShellLayout>

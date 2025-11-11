@@ -11,8 +11,7 @@ import {
   type SVGProps,
 } from 'react';
 import { createPortal } from 'react-dom';
-import { useSession } from '@features/session/SessionProvider';
-import { buildArchiveFilename, createSessionArchive, parseSessionArchive } from '@features/session/sessionArchive';
+import { useSessionArchiveTransfer } from '@features/session/useSessionArchiveTransfer';
 import { usePlaybackController, type PlaybackSnapshot } from './PlaybackControllerContext';
 import PlaybackAnalysisDock from './PlaybackAnalysisDock';
 
@@ -162,7 +161,7 @@ const PlaybackToolbar = () => {
     pauseOnUnmatchedPastes,
     setPauseOnUnmatchedPastes,
   } = usePlaybackController();
-  const { session, loadSession } = useSession();
+  const { transferNote, isDownloadingArchive, isUploadingArchive, downloadArchive, uploadArchive } = useSessionArchiveTransfer();
   const minimapRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const archiveInputRef = useRef<HTMLInputElement>(null);
@@ -172,9 +171,6 @@ const PlaybackToolbar = () => {
   const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const settingsPanelId = useId();
-  const [transferNote, setTransferNote] = useState<{ status: 'success' | 'error'; message: string } | null>(null);
-  const [isDownloadingArchive, setIsDownloadingArchive] = useState(false);
-  const [isUploadingArchive, setIsUploadingArchive] = useState(false);
 
   const detailSnapshot = useMemo(() => {
     if (selectedMarkerId) {
@@ -304,28 +300,11 @@ const PlaybackToolbar = () => {
 
   const handleDownload = useCallback(async () => {
     try {
-      setIsDownloadingArchive(true);
-      const { blob, manifest } = await createSessionArchive(session);
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      const filename = buildArchiveFilename(session, manifest.createdAt);
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-      setTransferNote({
-        status: 'success',
-        message: `Archive downloaded · saved as ${filename}`,
-      });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unable to build session archive.';
-      setTransferNote({ status: 'error', message });
-    } finally {
-      setIsDownloadingArchive(false);
+      await downloadArchive();
+    } catch {
+      // noop — hook surfaces errors via transferNote
     }
-  }, [session]);
+  }, [downloadArchive]);
 
   const handleUploadClick = useCallback(() => {
     archiveInputRef.current?.click();
@@ -337,22 +316,12 @@ const PlaybackToolbar = () => {
       event.target.value = '';
       if (!file) return;
       try {
-        setIsUploadingArchive(true);
-        const { session: importedSession, manifest } = await parseSessionArchive(file);
-        loadSession(importedSession);
-        setTransferNote({
-          status: 'success',
-          message: `Archive verified · SHA-256 ${manifest.sessionHash.slice(0, 12)}…`,
-        });
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : 'Unable to verify archive. Confirm the zip is intact.';
-        setTransferNote({ status: 'error', message });
-      } finally {
-        setIsUploadingArchive(false);
+        await uploadArchive(file);
+      } catch {
+        // noop — hook surfaces errors via transferNote
       }
     },
-    [loadSession]
+    [uploadArchive]
   );
 
   const handleMinimapClick = (event: PointerEvent<HTMLDivElement>) => {
