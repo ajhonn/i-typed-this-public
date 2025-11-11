@@ -2,7 +2,7 @@ import type { PropsWithChildren } from 'react';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { RecorderEvent } from '@features/recorder/types';
 
-type SessionState = {
+export type SessionState = {
   editorHTML: string;
   events: RecorderEvent[];
 };
@@ -14,6 +14,7 @@ type SessionContextValue = {
   setEditorHTML: (html: string) => void;
   appendEvent: (event: RecorderEvent) => void;
   clearSession: () => void;
+  loadSession: (next: SessionState) => void;
   recorderState: RecorderState;
   setRecorderState: (state: RecorderState) => void;
 };
@@ -56,6 +57,13 @@ export const SessionProvider = ({ children }: PropsWithChildren) => {
     setSession(INITIAL_SESSION);
   }, []);
 
+  const loadSession = useCallback((next: SessionState) => {
+    setSession({
+      editorHTML: typeof next.editorHTML === 'string' && next.editorHTML.length ? next.editorHTML : '<p></p>',
+      events: Array.isArray(next.events) ? next.events.slice(0, MAX_EVENTS) : [],
+    });
+  }, []);
+
   useEffect(() => {
     if (import.meta.env.DEV && typeof window !== 'undefined') {
       const devWindow = window as typeof window & {
@@ -76,10 +84,11 @@ export const SessionProvider = ({ children }: PropsWithChildren) => {
       setEditorHTML,
       appendEvent,
       clearSession,
+      loadSession,
       recorderState,
       setRecorderState,
     }),
-    [session, setEditorHTML, appendEvent, clearSession, recorderState, setRecorderState]
+    [session, setEditorHTML, appendEvent, clearSession, loadSession, recorderState, setRecorderState]
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

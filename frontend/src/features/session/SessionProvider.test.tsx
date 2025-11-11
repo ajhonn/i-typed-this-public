@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { SessionProvider, useSession } from './SessionProvider';
 
 const SessionConsumer = () => {
-  const { session, setEditorHTML, appendEvent } = useSession();
+  const { session, setEditorHTML, appendEvent, loadSession } = useSession();
 
   return (
     <div>
@@ -29,6 +29,31 @@ const SessionConsumer = () => {
       >
         Append Event
       </button>
+      <button
+        type="button"
+        onClick={() =>
+          loadSession({
+            editorHTML: '<p>loaded</p>',
+            events: [
+              {
+                id: 'evt-loaded',
+                type: 'transaction',
+                timestamp: 99,
+                source: 'transaction',
+                meta: {
+                  docSize: 1,
+                  stepTypes: [],
+                  selection: { from: 0, to: 0 },
+                  docChanged: true,
+                  html: '<p>loaded</p>',
+                },
+              },
+            ],
+          })
+        }
+      >
+        Load Session
+      </button>
       <p data-testid="events-count">{session.events.length}</p>
     </div>
   );
@@ -49,6 +74,10 @@ describe('SessionProvider', () => {
 
     expect(screen.getByTestId('events-count')).toHaveTextContent('0');
     await user.click(screen.getByRole('button', { name: /append event/i }));
+    expect(screen.getByTestId('events-count')).toHaveTextContent('1');
+
+    await user.click(screen.getByRole('button', { name: /load session/i }));
+    expect(screen.getByTestId('session-html')).toHaveTextContent('<p>loaded</p>');
     expect(screen.getByTestId('events-count')).toHaveTextContent('1');
   });
 });
