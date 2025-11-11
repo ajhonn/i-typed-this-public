@@ -90,7 +90,8 @@ describe('PlaybackToolbar', () => {
 
     expect(await screen.findByRole('button', { name: /^Play$/i })).toBeInTheDocument();
     expect(screen.getByLabelText(/Playback speed/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Download session JSON/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Download session zip/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Upload session zip/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Toggle playback settings/i })).toBeInTheDocument();
     const timeline = await screen.findByTestId('playback-timeline');
     expect(timeline).toBeInTheDocument();

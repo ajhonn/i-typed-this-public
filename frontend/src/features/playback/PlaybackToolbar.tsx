@@ -1,6 +1,17 @@
-import { useCallback, useEffect, useMemo, useRef, useState, useId, type PointerEvent, type ReactNode, type SVGProps } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useId,
+  type ChangeEvent,
+  type PointerEvent,
+  type ReactNode,
+  type SVGProps,
+} from 'react';
 import { createPortal } from 'react-dom';
-import { useSession } from '@features/session/SessionProvider';
+import { useSessionArchiveTransfer } from '@features/session/useSessionArchiveTransfer';
 import { usePlaybackController, type PlaybackSnapshot } from './PlaybackControllerContext';
 import PlaybackAnalysisDock from './PlaybackAnalysisDock';
 
@@ -95,6 +106,20 @@ const SettingsIcon = (props: IconProps) => (
   </svg>
 );
 
+const UploadIcon = (props: IconProps) => (
+  <svg {...iconBaseProps} {...props}>
+    <path d="M8 13V6" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" />
+    <polyline
+      points="5.5 8.5 8 5.5 10.5 8.5"
+      stroke="currentColor"
+      strokeWidth={1.4}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path d="M4 3.5h8" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" />
+  </svg>
+);
+
 const ChevronLeftIcon = (props: IconProps) => (
   <svg {...iconBaseProps} {...props}>
     <polyline
@@ -136,9 +161,10 @@ const PlaybackToolbar = () => {
     pauseOnUnmatchedPastes,
     setPauseOnUnmatchedPastes,
   } = usePlaybackController();
-  const { session } = useSession();
+  const { transferNote, isDownloadingArchive, isUploadingArchive, downloadArchive, uploadArchive } = useSessionArchiveTransfer();
   const minimapRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  const archiveInputRef = useRef<HTMLInputElement>(null);
   const [isScrubbing, setIsScrubbing] = useState(false);
   const [viewportDuration, setViewportDuration] = useState(DEFAULT_VIEWPORT_MS);
   const [viewportStart, setViewportStart] = useState(0);
@@ -272,17 +298,31 @@ const PlaybackToolbar = () => {
   );
 
 
-  const handleDownload = () => {
-    const blob = new Blob([JSON.stringify(session, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `session-${new Date().toISOString()}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
+  const handleDownload = useCallback(async () => {
+    try {
+      await downloadArchive();
+    } catch {
+      // noop — hook surfaces errors via transferNote
+    }
+  }, [downloadArchive]);
+
+  const handleUploadClick = useCallback(() => {
+    archiveInputRef.current?.click();
+  }, []);
+
+  const handleArchiveInputChange = useCallback(
+    async (event: ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      event.target.value = '';
+      if (!file) return;
+      try {
+        await uploadArchive(file);
+      } catch {
+        // noop — hook surfaces errors via transferNote
+      }
+    },
+    [uploadArchive]
+  );
 
   const handleMinimapClick = (event: PointerEvent<HTMLDivElement>) => {
     if (!totalDuration) return;
@@ -607,67 +647,98 @@ const PlaybackToolbar = () => {
 
   const transportControls = (
     <section
-      className="flex w-full max-w-[640px] flex-wrap items-center justify-center gap-3 self-center rounded-full border border-slate-200 bg-white/95 px-5 py-2 text-xs text-slate-600 shadow-lg backdrop-blur"
+      className="flex w-full max-w-[640px] flex-col gap-2 self-center rounded-3xl border border-slate-200 bg-white/95 px-5 py-3 text-xs text-slate-600 shadow-lg backdrop-blur"
       aria-label="Playback transport controls"
     >
-      <button
-        type="button"
-        onClick={togglePlay}
-        disabled={!canPlay}
-        aria-pressed={isPlaying}
-        className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${
-          isPlaying
-            ? 'border-slate-200 text-slate-700 hover:bg-slate-100'
-            : 'border-emerald-300 bg-emerald-50 text-emerald-700 shadow-[0_0_12px_rgba(16,185,129,0.25)] hover:bg-emerald-100'
-        }`}
-      >
-        <span aria-hidden className="text-current">
-          {isPlaying ? <PauseIcon className="h-4 w-4" /> : <PlayIcon className="h-4 w-4" />}
-        </span>
-        <span>{isPlaying ? 'Pause' : 'Play'}</span>
-      </button>
-      <button
-        type="button"
-        onClick={reset}
-        disabled={currentTime === 0}
-        className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3.5 py-1.5 text-sm text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        <RotateCcwIcon className="h-4 w-4" aria-hidden="true" />
-        Reset
-      </button>
-      <label className="flex items-center gap-2 text-xs text-slate-600">
-        <span>Speed</span>
-        <input
-          aria-label="Playback speed"
-          type="range"
-          min={1}
-          max={10}
-          step={0.5}
-          value={speed}
-          onChange={(event) => setSpeed(Number(event.target.value))}
-          className="w-32"
-        />
-        <span>{speed.toFixed(1)}x</span>
-      </label>
-      <button
-        type="button"
-        aria-label="Download session JSON"
-        onClick={handleDownload}
-        className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
-      >
-        <DownloadIcon className="h-4 w-4" aria-hidden="true" />
-      </button>
-      <button
-        type="button"
-        aria-label="Toggle playback settings"
-        onClick={toggleSettingsPanel}
-        aria-pressed={isSettingsOpen}
-        aria-expanded={isSettingsOpen}
-        aria-controls={isSettingsOpen ? settingsPanelId : undefined}
-        className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
-      >
-        <SettingsIcon className="h-4 w-4" aria-hidden="true" />
-      </button>
+      <div className="flex flex-wrap items-center justify-center gap-3">
+        <button
+          type="button"
+          onClick={togglePlay}
+          disabled={!canPlay}
+          aria-pressed={isPlaying}
+          className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${
+            isPlaying
+              ? 'border-slate-200 text-slate-700 hover:bg-slate-100'
+              : 'border-emerald-300 bg-emerald-50 text-emerald-700 shadow-[0_0_12px_rgba(16,185,129,0.25)] hover:bg-emerald-100'
+          }`}
+        >
+          <span aria-hidden className="text-current">
+            {isPlaying ? <PauseIcon className="h-4 w-4" /> : <PlayIcon className="h-4 w-4" />}
+          </span>
+          <span>{isPlaying ? 'Pause' : 'Play'}</span>
+        </button>
+        <button
+          type="button"
+          onClick={reset}
+          disabled={currentTime === 0}
+          className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3.5 py-1.5 text-sm text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <RotateCcwIcon className="h-4 w-4" aria-hidden="true" />
+          Reset
+        </button>
+        <label className="flex items-center gap-2 text-xs text-slate-600">
+          <span>Speed</span>
+          <input
+            aria-label="Playback speed"
+            type="range"
+            min={1}
+            max={10}
+            step={0.5}
+            value={speed}
+            onChange={(event) => setSpeed(Number(event.target.value))}
+            className="w-32"
+          />
+          <span>{speed.toFixed(1)}x</span>
+        </label>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+          aria-label="Upload session zip at i-typed-this.com/playback"
+            onClick={handleUploadClick}
+            disabled={isUploadingArchive}
+            className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <UploadIcon className="h-4 w-4" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            aria-label="Download session zip with README"
+            onClick={() => void handleDownload()}
+            disabled={isDownloadingArchive}
+            className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <DownloadIcon className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
+        <button
+          type="button"
+          aria-label="Toggle playback settings"
+          onClick={toggleSettingsPanel}
+          aria-pressed={isSettingsOpen}
+          aria-expanded={isSettingsOpen}
+          aria-controls={isSettingsOpen ? settingsPanelId : undefined}
+          className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
+        >
+          <SettingsIcon className="h-4 w-4" aria-hidden="true" />
+        </button>
+      </div>
+      {transferNote ? (
+        <p
+          role="status"
+          className={`text-xs font-semibold ${
+            transferNote.status === 'success' ? 'text-emerald-600' : 'text-rose-600'
+          }`}
+        >
+          {transferNote.message}
+        </p>
+      ) : null}
+      <input
+        ref={archiveInputRef}
+        type="file"
+        className="sr-only"
+        accept=".zip,application/zip"
+        onChange={handleArchiveInputChange}
+      />
     </section>
   );
 
