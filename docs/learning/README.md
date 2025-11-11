@@ -16,6 +16,7 @@
 - modal-accessibility.md — dialog semantics checklist
 - session-context.md — how the shared editor state feeds the future recorder
 - recorder-basics.md — overview of the new event log and download bundle
+- session-hashing-eli5.md — why we take a “photo” of each session and double-check it later
 - clipboard-ledger.md — ELI5 view of copy tracking + paste matching
 - paste-classification-playbook.md — how payload size/idle/ledger hits map to labels
 - clipboard-tuning-checklist.md — hashing, TTL, and testing guidance for the ledger
