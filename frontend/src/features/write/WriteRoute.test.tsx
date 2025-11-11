@@ -1,8 +1,9 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { RouterProvider, createMemoryRouter } from 'react-router';
 import WriteRoute from './WriteRoute';
 import { SessionProvider } from '@features/session/SessionProvider';
+import { vi } from 'vitest';
 
 describe('WriteRoute', () => {
   beforeEach(() => {
@@ -51,4 +52,56 @@ describe('WriteRoute', () => {
     },
     10000
   );
+
+  it('copies the editor contents when Copy All is pressed', async () => {
+    const router = createMemoryRouter([
+      {
+        path: '/',
+        element: <WriteRoute />,
+      },
+    ]);
+
+    const write = vi.fn().mockResolvedValue(undefined);
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    const clipboard = navigator.clipboard;
+    const originalWrite = clipboard?.write;
+    const originalWriteText = clipboard?.writeText;
+    const originalClipboardItem = window.ClipboardItem;
+    if (clipboard) {
+      clipboard.write = write as typeof clipboard.write;
+      clipboard.writeText = writeText as typeof clipboard.writeText;
+    }
+    class MockClipboardItem {
+      constructor(public items: Record<string, Blob>) {
+        return this;
+      }
+    }
+    Object.defineProperty(window, 'ClipboardItem', {
+      value: MockClipboardItem as typeof ClipboardItem,
+      configurable: true,
+    });
+
+    const user = userEvent.setup();
+    render(
+      <SessionProvider>
+        <RouterProvider router={router} />
+      </SessionProvider>
+    );
+
+    const copyButton = await screen.findByRole('button', { name: /copy all/i });
+    await waitFor(() => expect(copyButton).toBeEnabled());
+    await user.click(copyButton);
+
+    await waitFor(() => expect(write).toHaveBeenCalled());
+    expect(await screen.findByRole('button', { name: /copied!/i })).toBeInTheDocument();
+
+    if (clipboard) {
+      clipboard.write = originalWrite as typeof clipboard.write;
+      clipboard.writeText = originalWriteText as typeof clipboard.writeText;
+    }
+    Object.defineProperty(window, 'ClipboardItem', {
+      value: originalClipboardItem,
+      configurable: true,
+    });
+  });
 });

@@ -4,6 +4,7 @@ import HeroModal from './HeroModal';
 import WriterEditor from './WriterEditor';
 import { WriterEditorProvider } from './WriterEditorContext';
 import { useWriterEditor } from './useWriterEditor';
+import CopyAllButton from './CopyAllButton';
 
 const HERO_STORAGE_KEY = 'write-hero-dismissed';
 
@@ -30,6 +31,7 @@ const WriteRoute = () => {
         title="Observe the writing journey"
         description="Replay keystrokes, verify integrity, and surface authorship signals from live writing sessions."
         showHeader={false}
+        ribbonAction={<CopyAllButton />}
       >
         <WriterEditor />
         {showHero ? <HeroModal onDismiss={() => setShowHero(false)} /> : null}
