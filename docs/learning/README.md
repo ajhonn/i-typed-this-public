@@ -29,5 +29,6 @@
 ## 05 · Practices
 - git-basics.md — branching, reset vs revert, general workflow tips
 - commits-prs.md — Conventional Commits, PR hygiene
+- backend-hash-ledger.md — recap of the newly added server ledger and receipt flow
 
 Add new chapters/files as you learn; keep the numbering to stay organized.
