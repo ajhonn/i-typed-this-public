@@ -152,3 +152,7 @@ __pycache__/
 .python-version
 .uv/
 .pre-commit-cache/.lock
+
+# Local storage for backend ledger
+backend/data/
+data/
