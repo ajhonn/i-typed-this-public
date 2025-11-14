@@ -74,9 +74,10 @@ All rules should be tunable via configuration so thresholds can evolve without c
 
 ## 8. Implementation Status (MVP shell)
 - Segmentation, burst stats, revision counters, and heuristic verdicts now run client-side via `useSessionAnalysis`.
-- Paste events rely on DOM `insertFromPaste` hooks; unmatched classification currently uses payload size + idle-time heuristics until the clipboard ledger ships.
-- Paste events now capture clipboard payload previews client-side so reviewers can skim a ledger of inserts; a future iteration will hash-match against the copy buffer for stricter classification.
+- DOM `insertFromPaste` hooks feed a hashed clipboard ledger, so internal copy/paste moves are marked as such and unmatched pastes are flagged only when they skip the ledger *and* exceed payload-length or idle-time heuristics.
+- Recorder copy/cut events store hashes + previews, and the session archive exporter now wraps every download in a SHA-256-signed zip so uploads can be re-hashed and verified before loading; these same artifacts drive the Paste Ledger card and transfer helpers in playback.
 - Playback renders a dedicated “Authorship signals” panel showing pause score, revision rate, burst variance, paste anomalies, and narrative reasoning so reviewers understand the verdict.
+- Layer 2 verification is still local-only; the next increment wires these archives into the FastAPI `/api/v1/hashes` endpoints per `docs/backend-session-hashing-plan.md`.
 
 ## 8. References
 - Crossley, S., Holmes, L., Tian, Y., Morris, W., & Choi, J. S. (2024). *Plagiarism Detection Using Keystroke Logs.*

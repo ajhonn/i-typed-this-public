@@ -21,17 +21,17 @@
 - [ ] Add load + clear controls.
 
 ## Analysis Engine
-- [ ] Implement pause detection (200 ms / 2 s thresholds) and burst grouping.
-- [ ] Compute revision metrics (insert/delete counts, product-process ratio).
-- [ ] Match paste events against clipboard ledger and in-document hashes.
-- [ ] Aggregate session summary metrics (pause score, burst variance, paste anomaly count).
+- [x] Implement pause detection (200 ms / 2 s thresholds) and burst grouping.
+- [x] Compute revision metrics (insert/delete counts, product-process ratio).
+- [x] Match paste events against clipboard ledger and in-document hashes.
+- [x] Aggregate session summary metrics (pause score, burst variance, paste anomaly count).
 
 ## Analysis Insights Workspace
 > Extends `docs/frontend-analysis-methodology.md` and `docs/frontend-visualizations.md` by giving the analysis panel a full-page home.
-- [ ] `feat: scaffold analysis workspace` — add a dedicated `/analysis` route + ribbon tab and reuse `ShellLayout` for reviewer tooling.
-- [ ] `feat: surface existing panel on the analysis page` — mount `SessionAnalysisPanel` and align layout spacing for future charts.
-- [ ] `feat: add pause distribution histogram` — expose pause buckets from the analyzer and render the MVP histogram with accessible summaries.
-- [ ] `feat: plot WPM & burst pacing comparison` — derive WPM/burst stats, plot the series, and compare against cohort baselines.
+- [x] `feat: scaffold analysis workspace` — add a dedicated `/analysis` route + ribbon tab and reuse `ShellLayout` for reviewer tooling.
+- [x] `feat: surface existing panel on the analysis page` — mount `SessionAnalysisPanel` and align layout spacing for future charts.
+- [x] `feat: add pause distribution histogram` — expose pause buckets from the analyzer and render the MVP histogram with accessible summaries.
+- [x] `feat: plot WPM & burst pacing comparison` — derive WPM/burst stats, plot the series, and compare against cohort baselines.
 
 ## Playback Experience
 - [x] Create basic read-only Tiptap view driven by recorder snapshots (no timeline yet).
@@ -40,7 +40,7 @@
 - [ ] Highlight text during playback to match timeline segments.
 
 ## Persistence & Demos
-- [ ] Implement JSON download/upload for sessions; validate schema on load.
+- [x] Implement session archive download/upload (zip + schema/hash validation on load).
 - [ ] Provide built-in demo sessions (authentic vs. paste) for quick tour.
 
 ## Testing & QA

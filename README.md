@@ -19,13 +19,14 @@ It’s designed as an educational integrity and authorship-evidence tool.
 i-typed-this/
 │
 ├─ frontend/          # React + TypeScript + Tailwind client app
-├─ backend/           # FastAPI verification API
-├─ packages/          # Shared logic (Frame types, serialization, paste classifier)
-├─ docs/              # Architecture, hashing spec, API contract
+├─ backend/           # FastAPI verification API + hash ledger
+├─ docs/              # MVP plans, recorder schema, hashing + API specs
 ├─ .devcontainer/     # Dev environment definition
 ├─ .github/           # CI workflows
 └─ Makefile           # Common commands
 ```
+
+Shared packages will eventually live in `packages/`; until those modules are published, any schema or hashing notes reside in `docs/`.
 
 ---
 
@@ -94,9 +95,10 @@ CI acts as a gatekeeper so branches without passing lint/tests never land in pro
 
 ## Docs
 
-* `docs/architecture.md` — high-level system overview
-* `docs/hashing-spec.md` — deterministic serialization for verification
-* `docs/api-contract.md` — endpoint definitions
+* `docs/frontend-mvp-plan.md` — recorder, playback, and analysis milestones for the client MVP.
+* `docs/frontend-recorder-schema.md` — canonical event model, clipboard ledger, and archive format details.
+* `docs/backend-session-hashing-plan.md` — Layer 1/Layer 2 hashing roadmap plus shared work plan.
+* `docs/backend-api-spec.md` — FastAPI hash registration + verification contract used by the upcoming integration.
 
 ---
 

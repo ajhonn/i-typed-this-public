@@ -6,6 +6,7 @@ This service implements the hash registration and verification endpoints describ
 ## Auth
 * Every request that registers a hash must supply the `X-API-Key` header.
 * The key defaults to `demo-api-key` but can be overridden via `I_TYPED_THIS_API_KEY`.
+* Verification requests remain unauthenticated for now so the frontend can replay receipts without additional setup.
 
 ## Model (shared schema)
 All sessions provide:
@@ -53,7 +54,7 @@ Compares the supplied session or hash against the ledger.
 }
 ```
 
-At least one of `sessionId` or `sessionHash` is required.
+All three fields are required: `receiptId` determines which record to inspect, and the backend compares the provided `sessionId` and `sessionHash` against the stored values to decide whether the submission is authentic, mismatched, or unknown.
 
 **Response**
 ```json
