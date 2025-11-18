@@ -22,6 +22,7 @@
 - clipboard-tuning-checklist.md — hashing, TTL, and testing guidance for the ledger
 - playback-dock-and-pauses.md — why the floating dock needs safe zones + how the pause toggle works
 - paste-ledger-review.md — how to scan the new ledger cards and hop into playback
+- ledger-integration.md — how the frontend registers hashes, embeds receipts, and verifies uploads against FastAPI
 
 ## 04 · Testing
 - testing-vitest.md — Vitest + Testing Library philosophy

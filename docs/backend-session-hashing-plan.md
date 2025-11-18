@@ -37,14 +37,13 @@
    - Add Vitest coverage for determinism and parity checks against Python reference vectors.
 
 4. **`feat(frontend): embed hash on download`**
-   - Integrate the hashing helper into the existing download control so every exported JSON includes the hash + version.
-   - Fire-and-forget POST to backend `/api/v1/hashes` to register `{sessionId, hash, metadata}`; store the returned `receiptId` beside the JSON.
-   - Update UI copy to explain that downloads are notarized for future verification.
+   - ✅ The archive builder now serializes `{sessionId, editorHTML, events}` and computes the SHA-256 hash before any backend calls.
+   - When `VITE_LEDGER_API_BASE_URL` is set, the download flow POSTs to `/api/v1/hashes` with `{sessionId, sessionHash, metadata}` and records the returned `receiptId` + `hashVersion` inside `manifest.json -> ledgerReceipt`.
+   - UI feedback (transfer note + ribbon badge) tells writers when a receipt has been stored.
 
 5. **`feat(frontend): add uploader + verification UI`**
-   - Implement the missing upload/import control from `docs/frontend-mvp-task-list.md`.
-   - On file select, validate against the shared schema, recompute the hash locally, and compare with the embedded value for instant feedback.
-   - Call backend `/api/v1/hashes/verify` to surface authoritative results (`match`, `mismatch`, `unknown`) in the playback panel.
+   - ✅ Playback’s upload prompt already validates archives locally; it now looks for `manifest.ledgerReceipt`, calls `/api/v1/hashes/verify`, and updates a new ledger badge when the backend reports `verified`/`mismatch`/`unknown`.
+   - Ledger env vars are optional, so reviewers still get offline verification even if the backend is disabled.
 
 6. **`chore(backend): bootstrap FastAPI service`**
    - Add `backend/` with `pyproject.toml`, `uv.lock`, `app/main.py`, Ruff config, and `/health` route so `uv run uvicorn app.main:app --reload --port 8000` works.
@@ -69,6 +68,14 @@
 
 ### Additional Backlog
 - **`feat(recorder): drop untrusted DOM events`** — update `useDomRecorder` and related clipboard hooks to skip `InputEvent`s where `event.isTrusted === false`, log suppression metrics, and surface an analysis flag when scripted activity is detected.
+
+## Offline tampering risk & mitigations
+- Offline downloads can be edited and re-hashed before a later ledger registration; hashes alone cannot prove provenance, only integrity of whatever payload is presented.
+- Mitigations we’re adopting:
+  - Keep the server in the loop at export: receipts are issued by the backend (server-signed) and embedded alongside the hash so the client can show “registered vs. offline” at playback.
+  - Treat offline exports as lower-trust: the UI surfaces ledger status; unregistered archives are clearly flagged rather than auto-trusted.
+  - Avoid storing content server-side for now; long-term, a server-held archive (or presigned upload at export time) plus a signed receipt would shut the gap entirely.
+- We are not attempting client-side obfuscation; determined users can still edit JSON. Provenance relies on server-issued receipts, not on hiding the format.
 
 ## Open Questions
 - Do we require the backend to store full session payloads later, or are hashes + metadata enough until ingestion lands?

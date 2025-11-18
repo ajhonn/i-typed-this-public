@@ -1,6 +1,7 @@
 import JSZip from 'jszip';
 import type { SessionState } from '@features/session/SessionProvider';
 import type { RecorderEvent } from '@features/recorder/types';
+import { generateSessionId } from './sessionId';
 
 export const SESSION_ARCHIVE_VERSION = '1.0.0';
 export const SESSION_ARCHIVE_README = [
@@ -28,6 +29,12 @@ export type SessionArchiveManifest = {
   createdAt: string;
   hashAlgorithm: 'SHA-256';
   sessionHash: string;
+  sessionId?: string;
+  ledgerReceipt?: {
+    receiptId: string;
+    hashVersion: string;
+    registeredAt: string;
+  };
   files: {
     session: string;
     readme: string;
@@ -78,17 +85,33 @@ const parseSessionJson = (payload: string): SessionState => {
     throw new Error('Session payload contains malformed recorder events.');
   }
 
-  return { editorHTML, events };
+  const sessionId =
+    typeof parsed.sessionId === 'string' && parsed.sessionId.length ? parsed.sessionId : generateSessionId();
+
+  return { sessionId, editorHTML, events };
 };
 
-export const createSessionArchive = async (session: SessionState) => {
-  const sessionJson = JSON.stringify(session, null, 2);
+const serializeSessionPayload = (session: SessionState) => ({
+  sessionId: session.sessionId,
+  editorHTML: session.editorHTML,
+  events: session.events,
+});
+
+export type PreparedSessionArchive = {
+  sessionJson: string;
+  manifest: SessionArchiveManifest;
+};
+
+export const prepareSessionArchive = async (session: SessionState): Promise<PreparedSessionArchive> => {
+  const sessionPayload = serializeSessionPayload(session);
+  const sessionJson = JSON.stringify(sessionPayload, null, 2);
   const sessionHash = await computeSessionHash(sessionJson);
   const manifest: SessionArchiveManifest = {
     version: SESSION_ARCHIVE_VERSION,
     createdAt: new Date().toISOString(),
     hashAlgorithm: 'SHA-256',
     sessionHash,
+    sessionId: session.sessionId,
     files: {
       session: 'session.json',
       readme: 'README.txt',
@@ -96,6 +119,10 @@ export const createSessionArchive = async (session: SessionState) => {
     notes: ['Bundle generated client-side. Do not edit files before verification.'],
   };
 
+  return { sessionJson, manifest };
+};
+
+const buildArchiveBlob = async (sessionJson: string, manifest: SessionArchiveManifest) => {
   const zip = new JSZip();
   zip.file(manifest.files.session, sessionJson);
   zip.file('manifest.json', JSON.stringify(manifest, null, 2));
@@ -108,6 +135,25 @@ export const createSessionArchive = async (session: SessionState) => {
   });
 
   return { blob, manifest };
+};
+
+export const finalizeSessionArchive = async (
+  prepared: PreparedSessionArchive,
+  overrides?: { ledgerReceipt?: SessionArchiveManifest['ledgerReceipt'] },
+) => {
+  const manifest: SessionArchiveManifest = {
+    ...prepared.manifest,
+    ledgerReceipt: overrides?.ledgerReceipt ?? prepared.manifest.ledgerReceipt,
+  };
+  return buildArchiveBlob(prepared.sessionJson, manifest);
+};
+
+export const createSessionArchive = async (
+  session: SessionState,
+  options?: { ledgerReceipt?: SessionArchiveManifest['ledgerReceipt'] }
+) => {
+  const prepared = await prepareSessionArchive(session);
+  return finalizeSessionArchive(prepared, options);
 };
 
 export const parseSessionArchive = async (file: Blob) => {

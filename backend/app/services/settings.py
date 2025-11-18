@@ -12,6 +12,12 @@ class Settings(BaseSettings):
     database_path: Path = Field(
         default_factory=lambda: Path(__file__).resolve().parents[2] / "data" / "hash_receipts.db"
     )
+    cors_origins: list[str] = Field(
+        default_factory=lambda: [
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+        ]
+    )
     model_config = ConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

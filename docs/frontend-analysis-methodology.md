@@ -77,6 +77,8 @@ All rules should be tunable via configuration so thresholds can evolve without c
 - DOM `insertFromPaste` hooks feed a hashed clipboard ledger, so internal copy/paste moves are marked as such and unmatched pastes are flagged only when they skip the ledger *and* exceed payload-length or idle-time heuristics.
 - Recorder copy/cut events store hashes + previews, and the session archive exporter now wraps every download in a SHA-256-signed zip so uploads can be re-hashed and verified before loading; these same artifacts drive the Paste Ledger card and transfer helpers in playback.
 - Playback renders a dedicated “Authorship signals” panel showing pause score, revision rate, burst variance, paste anomalies, and narrative reasoning so reviewers understand the verdict.
+- When the FastAPI ledger is configured, downloads register a receipt and embed it inside the manifest; playback surfaces the backend verdict via a ledger badge so reviewers instantly know whether Layer 2 agreed with the local hash check.
+- Offline downloads remain integrity-only: the ledger badge highlights “registered” vs. “offline,” but provenance ultimately depends on a server-signed receipt at export time (or a future server-held archive).
 - Layer 2 verification is still local-only; the next increment wires these archives into the FastAPI `/api/v1/hashes` endpoints per `docs/backend-session-hashing-plan.md`.
 
 ## 8. References
