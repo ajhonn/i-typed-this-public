@@ -67,9 +67,11 @@ All events record the session `versionId` so playback and analysis can resolve d
 
 - **Bundle layout:** downloads now produce a `.zip` file containing `session.json` (raw recorder payload), `manifest.json`, and a plain-text `README.txt`. The README ships inside every archive so reviewers immediately know how to replay and verify the session.
 - **Signing strategy:** before zipping, the client serializes the session and computes a SHA-256 digest. The digest, archive version, and timestamp land in `manifest.json`. The manifest also records the expected filenames to guard against renames.
+- **Ledger receipt metadata:** when the backend hash ledger is configured, the manifest gains a `ledgerReceipt` object containing the issued `receiptId`, `hashVersion`, and `registeredAt` timestamp. Because this field lives outside the hashed `session.json`, the client can add it after registering the hash without changing the signature.
 - **Upload verification:** when someone uploads an archive, the client unzips it, re-computes the SHA-256 hash of `session.json`, and compares the digest against the manifest. A mismatch blocks loading and surfaces an error that the file may have been modified.
 - **Friendly filenames:** the downloaded zip now uses a slug from the document’s first few words plus the session date (e.g., `draft-intro-2025-01-07-i-typed-this.zip`) so reviewers can identify files at a glance.
 - **Why zip:** the archive keeps payloads compact (especially for long sessions) and ensures the README stays attached to the session data so reviewers never receive a bare JSON blob without context.
+- **Offline caveat:** offline downloads are integrity-only. A malicious user could edit `session.json`, re-hash, and later register that hash. The ledger receipt helps distinguish “registered” vs. “offline,” but true provenance still requires an online, server-signed receipt at export time (or storing the archive server-side).
 
 ## Open Questions
 

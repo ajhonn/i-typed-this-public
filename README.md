@@ -91,6 +91,17 @@ The GitHub Actions workflow at `.github/workflows/ci.yml` mirrors local checks o
 
 CI acts as a gatekeeper so branches without passing lint/tests never land in protected branches.
 
+### 7. Optional ledger integration
+
+To have the frontend register and verify session hashes against the FastAPI ledger, create `frontend/.env` (or export Vite env vars) with:
+
+```
+VITE_LEDGER_API_BASE_URL=http://localhost:8000
+VITE_LEDGER_API_KEY=demo-api-key
+```
+
+When set, every download registers a receipt via `/api/v1/hashes`, embeds it inside the archive manifest, and uploads will call `/api/v1/hashes/verify` to surface backend verdicts in playback.
+
 ---
 
 ## Docs

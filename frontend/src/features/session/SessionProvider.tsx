@@ -1,10 +1,22 @@
 import type { PropsWithChildren } from 'react';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { RecorderEvent } from '@features/recorder/types';
+import { generateSessionId } from './sessionId';
+
+export type SessionLedgerInfo = {
+  receiptId?: string;
+  hashVersion?: string;
+  firstSeenAt?: string;
+  lastVerifiedAt?: string;
+  status?: 'registered' | 'verified' | 'mismatch' | 'unknown' | 'error';
+  message?: string;
+};
 
 export type SessionState = {
+  sessionId: string;
   editorHTML: string;
   events: RecorderEvent[];
+  ledger?: SessionLedgerInfo;
 };
 
 type RecorderState = 'idle' | 'recording';
@@ -17,19 +29,21 @@ type SessionContextValue = {
   loadSession: (next: SessionState) => void;
   recorderState: RecorderState;
   setRecorderState: (state: RecorderState) => void;
+  setLedgerInfo: (info: SessionLedgerInfo | null) => void;
 };
 
 const SessionContext = createContext<SessionContextValue | undefined>(undefined);
 // TODO(recorder): replace this coarse limit with memory-aware trimming/streaming.
 const MAX_EVENTS = 1_000_000;
 
-const INITIAL_SESSION: SessionState = {
+const createInitialSession = (): SessionState => ({
+  sessionId: generateSessionId(),
   editorHTML: '<p></p>',
   events: [],
-};
+});
 
 export const SessionProvider = ({ children }: PropsWithChildren) => {
-  const [session, setSession] = useState<SessionState>(INITIAL_SESSION);
+  const [session, setSession] = useState<SessionState>(() => createInitialSession());
   const [recorderState, setRecorderState] = useState<RecorderState>('idle');
 
   const setEditorHTML = useCallback((html: string) => {
@@ -54,14 +68,23 @@ export const SessionProvider = ({ children }: PropsWithChildren) => {
   }, []);
 
   const clearSession = useCallback(() => {
-    setSession(INITIAL_SESSION);
+    setSession(createInitialSession());
   }, []);
 
   const loadSession = useCallback((next: SessionState) => {
     setSession({
+      sessionId: typeof next.sessionId === 'string' && next.sessionId.length ? next.sessionId : generateSessionId(),
       editorHTML: typeof next.editorHTML === 'string' && next.editorHTML.length ? next.editorHTML : '<p></p>',
       events: Array.isArray(next.events) ? next.events.slice(0, MAX_EVENTS) : [],
+      ledger: next.ledger,
     });
+  }, []);
+
+  const setLedgerInfo = useCallback((info: SessionLedgerInfo | null) => {
+    setSession((prev) => ({
+      ...prev,
+      ledger: info ?? undefined,
+    }));
   }, []);
 
   useEffect(() => {
@@ -87,8 +110,9 @@ export const SessionProvider = ({ children }: PropsWithChildren) => {
       loadSession,
       recorderState,
       setRecorderState,
+      setLedgerInfo,
     }),
-    [session, setEditorHTML, appendEvent, clearSession, loadSession, recorderState, setRecorderState]
+    [session, setEditorHTML, appendEvent, clearSession, loadSession, recorderState, setRecorderState, setLedgerInfo]
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

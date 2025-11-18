@@ -2,7 +2,13 @@ import JSZip from 'jszip';
 import { describe, expect, it } from 'vitest';
 import type { RecorderEvent } from '@features/recorder/types';
 import type { SessionState } from './SessionProvider';
-import { buildArchiveFilename, createSessionArchive, parseSessionArchive } from './sessionArchive';
+import {
+  buildArchiveFilename,
+  createSessionArchive,
+  finalizeSessionArchive,
+  parseSessionArchive,
+  prepareSessionArchive,
+} from './sessionArchive';
 
 const mockEvent: RecorderEvent = {
   id: 'evt-1',
@@ -19,6 +25,7 @@ const mockEvent: RecorderEvent = {
 };
 
 const sampleSession: SessionState = {
+  sessionId: 'session-sample',
   editorHTML: '<p>hello</p>',
   events: [mockEvent],
 };
@@ -47,5 +54,21 @@ describe('sessionArchive', () => {
   it('builds descriptive filenames from the editor text and date', () => {
     const filename = buildArchiveFilename(sampleSession, '2025-01-07T12:00:00.000Z');
     expect(filename).toBe('hello-2025-01-07-i-typed-this.zip');
+  });
+
+  it('persists ledger receipt metadata when provided during finalization', async () => {
+    const prepared = await prepareSessionArchive(sampleSession);
+    const { manifest } = await finalizeSessionArchive(prepared, {
+      ledgerReceipt: {
+        receiptId: 'receipt-ledger',
+        hashVersion: 'v1',
+        registeredAt: '2025-01-01T00:00:00.000Z',
+      },
+    });
+    expect(manifest.ledgerReceipt).toEqual({
+      receiptId: 'receipt-ledger',
+      hashVersion: 'v1',
+      registeredAt: '2025-01-01T00:00:00.000Z',
+    });
   });
 });

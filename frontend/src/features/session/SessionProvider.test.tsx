@@ -33,6 +33,7 @@ const SessionConsumer = () => {
         type="button"
         onClick={() =>
           loadSession({
+            sessionId: 'session-loaded',
             editorHTML: '<p>loaded</p>',
             events: [
               {

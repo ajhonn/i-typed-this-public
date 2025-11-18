@@ -71,4 +71,4 @@ All three fields are required: `receiptId` determines which record to inspect, a
 2. `mismatch` when the receipt exists but either the `sessionId` or `sessionHash` differ.
 3. `unknown` when no matching receipt exists.
 
-Use this endpoint to feed the verification badge described in the frontend roadmap (`docs/frontend-mvp-plan.md`).
+Use this endpoint to feed the verification badge described in the frontend roadmap (`docs/frontend-mvp-plan.md`). The client now stores the `receiptId` returned during download inside each archive’s `manifest.json` (`ledgerReceipt.receiptId`), so uploads can automatically call `/verify` without prompting the reviewer.

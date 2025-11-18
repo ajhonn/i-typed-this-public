@@ -1,6 +1,7 @@
 import { Link } from 'react-router';
 import SessionSignalsRadar from '@features/analysis/SessionSignalsRadar';
 import { useSessionAnalysis } from '@features/analysis/useSessionAnalysis';
+import SessionLedgerBadge from '@features/session/SessionLedgerBadge';
 import { ROUTES } from '@routes/paths';
 
 const verdictCopy: Record<string, { label: string; tone: string }> = {
@@ -19,9 +20,12 @@ const PlaybackAnalysisSummary = () => {
         <div>
           <p className="text-xs uppercase tracking-[0.4em] text-slate-500">Session signals</p>
         </div>
-        <span className={['inline-flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-1 text-xs font-semibold uppercase tracking-wide', verdict?.tone ?? ''].join(' ')}>
-          {verdict?.label ?? 'Insufficient data'}
-        </span>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={['inline-flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-1 text-xs font-semibold uppercase tracking-wide', verdict?.tone ?? ''].join(' ')}>
+            {verdict?.label ?? 'Insufficient data'}
+          </span>
+          <SessionLedgerBadge />
+        </div>
       </div>
             <SessionSignalsRadar showCopy={false} showCard={false} height={260} dataTestId="playback-signals-radar" />
       <div className="flex justify-end">
