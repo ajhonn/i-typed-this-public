@@ -6,11 +6,14 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.services.auth import require_api_key
-from app.services.persistence import ReceiptStore
+from app.services.persistence import PostgresReceiptStore, ReceiptStore
 from app.services.settings import get_settings
 
 settings = get_settings()
-store = ReceiptStore(settings.database_path)
+if settings.database_url:
+    store = PostgresReceiptStore(settings.database_url)
+else:
+    store = ReceiptStore(settings.database_path)
 
 router = APIRouter(prefix="/api/v1/hashes", tags=["hashes"])
 

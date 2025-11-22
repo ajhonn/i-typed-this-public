@@ -23,6 +23,7 @@
 - playback-dock-and-pauses.md — why the floating dock needs safe zones + how the pause toggle works
 - paste-ledger-review.md — how to scan the new ledger cards and hop into playback
 - ledger-integration.md — how the frontend registers hashes, embeds receipts, and verifies uploads against FastAPI
+- auth0-ledger-eli5.md — why Auth0 hands out short-lived “passes” the ledger trusts
 
 ## 04 · Testing
 - testing-vitest.md — Vitest + Testing Library philosophy

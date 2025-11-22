@@ -9,6 +9,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     api_key: str = Field("demo-api-key")
+    database_url: str | None = Field(default=None)
     database_path: Path = Field(
         default_factory=lambda: Path(__file__).resolve().parents[2] / "data" / "hash_receipts.db"
     )
