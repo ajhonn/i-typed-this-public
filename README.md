@@ -70,6 +70,21 @@ uv sync
 uv run uvicorn app.main:app --reload --port 8000
 ```
 
+The backend defaults to SQLite at `backend/data/hash_receipts.db` and an API key of `demo-api-key`. The repo includes a `.env` pointing to Supabase/Postgres on `127.0.0.1:54322`; run `supabase start` from the repo root to satisfy that, or unset `I_TYPED_THIS_DATABASE_URL` to stay on SQLite.
+Override as needed:
+
+```
+I_TYPED_THIS_API_KEY=your-key
+I_TYPED_THIS_DATABASE_URL=postgresql://...
+```
+
+When pointing at Postgres or Supabase, initialize the ledger table once:
+
+```
+psql "$I_TYPED_THIS_DATABASE_URL" -f supabase/seed.sql
+# or: supabase db reset
+```
+
 ### 5. Install pre-commit hooks
 
 These hooks guard lint and test standards locally before code lands in CI.
@@ -91,13 +106,49 @@ The GitHub Actions workflow at `.github/workflows/ci.yml` mirrors local checks o
 
 CI acts as a gatekeeper so branches without passing lint/tests never land in protected branches.
 
+### Makefile shortcuts
+
+Common tasks live in `Makefile`:
+
+```
+make frontend-install   # npm install
+make frontend-dev       # npm run dev
+make backend-sync       # uv sync
+make backend-dev        # uv run uvicorn app.main:app --reload --port 8000
+make lint               # frontend + backend lint
+make test               # frontend + backend tests
+```
+
 ### 7. Optional ledger integration
 
-To have the frontend register and verify session hashes against the FastAPI ledger, create `frontend/.env` (or export Vite env vars) with:
+Configure the FastAPI ledger and the frontend to register/verify session hashes:
+
+**Backend env**
+
+```
+I_TYPED_THIS_API_KEY=demo-api-key             # change in prod
+# Optional: switch from SQLite to Postgres/Supabase
+I_TYPED_THIS_DATABASE_URL=postgresql://...
+```
+
+**Frontend env**
 
 ```
 VITE_LEDGER_API_BASE_URL=http://localhost:8000
 VITE_LEDGER_API_KEY=demo-api-key
+```
+
+**Smoke test the ledger (with backend running)**
+
+```
+curl -X POST http://localhost:8000/api/v1/hashes \
+  -H 'X-API-Key: demo-api-key' \
+  -H 'Content-Type: application/json' \
+  -d '{"sessionId":"session-123","sessionHash":"abc123","hashVersion":"v1","metadata":{}}'
+
+curl -X POST http://localhost:8000/api/v1/hashes/verify \
+  -H 'Content-Type: application/json' \
+  -d '{"receiptId":"<from-above>","sessionId":"session-123","sessionHash":"abc123"}'
 ```
 
 When set, every download registers a receipt via `/api/v1/hashes`, embeds it inside the archive manifest, and uploads will call `/api/v1/hashes/verify` to surface backend verdicts in playback.
