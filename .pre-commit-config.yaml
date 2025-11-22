@@ -48,6 +48,8 @@ repos:
         entry: bash
         language: system
         pass_filenames: false
+        env:
+          I_TYPED_THIS_DATABASE_URL: ""
         stages: [pre-commit, pre-push]
         args:
           - -lc
